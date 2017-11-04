@@ -25,7 +25,7 @@ import re
 import base64
 import shutil
 from collections import namedtuple
-from ConfigParser import SafeConfigParser, NoSectionError, \
+from ConfigParser import SafeConfigParser,  \
                          MissingSectionHeaderError, Error
 
 from gitbuildsys import errors
@@ -362,6 +362,8 @@ url = http://download.tizen.org/releases/daily/trunk/ivi/latest/
                             if plainpass is None:
                                 # empty string password is acceptable here
                                 continue
+                            if plainpass.startswith('${passwd}'):
+                                continue
                             cfgparser.set_into_file(sec,
                                                     key + 'x',
                                                     encode_passwd(plainpass),
@@ -405,16 +407,35 @@ url = http://download.tizen.org/releases/daily/trunk/ivi/latest/
                 return True
         return False
 
+
     def get(self, opt, section='general'):
         'get item value. return plain text of password if item is passwd'
+        ret = ''
         if opt == 'passwd':
-            val = self._get('passwdx', section)
+            passwd = ''
             try:
-                return decode_passwdx(val)
-            except (TypeError, IOError), err:
-                raise errors.ConfigError('passwdx:%s' % err)
+                passwd = self._get('passwd', section)
+            except:#Get no data, continue to find in 'passwdx'
+                pass
+
+            if passwd:
+                 ret = passwd
+            else:
+                 val = self._get('passwdx', section)
+                 try:
+                     ret = decode_passwdx(val)
+                 except (TypeError, IOError), err:
+                     raise errors.ConfigError('passwdx:%s' % err)
         else:
-            return self._get(opt, section)
+            ret = self._get(opt, section)
+
+        if section != 'general' and ( opt == 'passwd' or opt == 'user'):
+            g_user = self.get_optional_item('general','user')
+            g_passwd = self.get_optional_item('general','passwd')
+            ret = re.sub(r'\$\{([^}]+)\}', r'%(\1)s', ret)
+            ret = ret % {'user': g_user,'passwd': g_passwd}
+
+        return ret
 
     def get_arg_conf(self, args, opt, section='general'):
         """get value from command line arguments if found there, otherwise fall
@@ -614,7 +635,16 @@ class BizConfigManager(ConfigMgr):
             raise errors.ConfigError('no such section: %s' % name)
 
         user = self.get_optional_item(name, 'user')
+        if not user:
+            g_user = self.get_optional_item('general','user')
+            if g_user:
+                user = g_user
+
         password = self.get_optional_item(name, 'passwd')
+        if not password:
+            g_passwd = self.get_optional_item('general','passwd')
+            if g_passwd:
+                password = g_passwd
 
         profile = Profile(name, user, password)
 
