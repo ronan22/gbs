@@ -322,6 +322,8 @@ def build_parser(parser):
     group.add_argument('--rdeps', action='store_true',
                         help='build specified packages and all packages '
                         'depend on them')
+    group.add_argument('--disable-debuginfo', action='store_true',
+                        help='Do not create debuginfo packages when building')
 
     parser.set_defaults(alias="lb")
     return parser
