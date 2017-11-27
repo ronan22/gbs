@@ -230,6 +230,8 @@ def prepare_depanneur_opts(args):
         cmd_opts += ['--fail-fast']
     if args.keepgoing:
         cmd_opts += ['--keepgoing=%s' % args.keepgoing]
+    if args.disable_debuginfo:
+        cmd_opts += ['--disable-debuginfo']
     #
     if args.package_list:
         package_list = args.package_list.split(',')
