@@ -383,4 +383,4 @@ class OSC(object):
         meta = ET.fromstring(self.get_meta(prj, pkg))
         dsc = meta.find('description')
         dsc.text = description
-        self.set_meta(ET.tostring(meta), prj, pkg)
+        return self.set_meta(ET.tostring(meta), prj, pkg)
