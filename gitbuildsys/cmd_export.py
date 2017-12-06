@@ -329,8 +329,9 @@ def main(args):
     if not spec.name or not spec.version:
         raise GbsError('can\'t get correct name or version from spec file.')
     else:
-        outdir = "%s/%s-%s-%s" % (outdir, spec.name, spec.upstreamversion,
-                                  spec.release)
+        if not args.outdir_directly:
+            outdir = "%s/%s-%s-%s" % (outdir, spec.name, spec.upstreamversion,
+                                      spec.release)
     if os.path.exists(outdir):
         if not os.access(outdir, os.W_OK|os.X_OK):
             raise GbsError('no permission to update outdir: %s' % outdir)

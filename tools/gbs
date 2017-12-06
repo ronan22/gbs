@@ -131,6 +131,9 @@ def export_parser(parser):
                          'colon and diff filename base.')
     parser.add_argument('--packaging-dir',
                         help='directory containing packaging files')
+    parser.add_argument('--outdir-directly', action='store_true',
+                        help='Use the directory of --outdir parameter directly'
+                        'rather than outdir/pkg-version-release')
 
     parser.set_defaults(alias="ex")
     return parser
