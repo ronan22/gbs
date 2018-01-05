@@ -149,6 +149,7 @@ rm -rf %{buildroot}
 %{python_sitelib}/gitbuildsys/cmd_import.py*
 %{python_sitelib}/gitbuildsys/cmd_pull.py*
 %{python_sitelib}/gitbuildsys/cmd_submit.py*
+%{python_sitelib}/gitbuildsys/cmd_depends.py*
 %{python_sitelib}/gitbuildsys/parsing.py*
 %{_bindir}/*
 %{_sysconfdir}/bash_completion.d

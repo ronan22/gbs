@@ -7,6 +7,7 @@ usr/lib/python*/*packages/gitbuildsys/cmd_devel.py
 usr/lib/python*/*packages/gitbuildsys/cmd_import.py
 usr/lib/python*/*packages/gitbuildsys/cmd_pull.py
 usr/lib/python*/*packages/gitbuildsys/cmd_submit.py
+usr/lib/python*/*packages/gitbuildsys/cmd_depends.py
 usr/lib/python*/*packages/gitbuildsys/parsing.py
 usr/bin/*
 etc/bash_completion.d/*
