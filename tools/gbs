@@ -573,6 +573,58 @@ def devel_parser(parser):
                         help='Action to take')
     return parser
 
+@subparser
+def depends_parser(parser):
+    """Output depends of packages
+    Examples:
+      $ gbs depends -A i586   # generate depends of packages for i586
+    """
+
+    parser.add_argument('gitdir', nargs='?', type=os.path.abspath,
+                        default=os.getcwd(),
+                        action=SearchConfAction,
+                        help='git repository path, which can contain multiple '
+                        'packages, in this case, all packages will be analysed in '
+                        'dependency order')
+
+    group = parser.add_argument_group('depends configuration options')
+    group.add_argument('-A', '--arch', help='target arch. Supported arch '
+                       'types are: %s' % ' '.join(cmd_build.SUPPORTEDARCHS))
+    group.add_argument('-D', '--dist',
+                        help='specify project (build) configuration file. '
+                        'User can specify build config in [profile.xx] '
+                        'section of gbs.conf using \'buildconf\' key, and '
+                        'the value is local path of build conf file')
+    group.add_argument('-P', '--profile',
+                        help='profile to be used for building, it is defined '
+                             'in .gbs.conf, can be given without the '
+                             '"profile." prefix')
+    group.add_argument('-R', '--repository', dest='repositories',
+                        action="append", help='specify package repositories, '
+                        'only rpm-md format is supported')
+    group.add_argument('--debug', action='store_true', help='debug output')
+    group.add_argument('-o', '--output',
+                        help='specify output directory for depends files')
+
+    group = parser.add_argument_group('depends env options')
+    group.add_argument('-B', '--buildroot',
+                        help='specify build root to setup chroot environment. '
+                        'By default, ~/GBS-ROOT/ will be used. User can specify'
+                        ' customized build root in gbs.conf with \'buildroot\' '
+                        'key, which can be set in [general] section for default'
+                        ' build root, or in [profile.xx] section for profile '
+                        'special build root')
+
+    group = parser.add_argument_group('git-tree options')
+    group.add_argument('-c', '--commit', help='specify a commit ID to build')
+    group.add_argument('--include-all', action='store_true',
+                        help='uncommitted changes and untracked files would be '
+                        'included while generating tar ball')
+    group.add_argument('--packaging-dir',
+                        help='directory containing packaging files')
+
+    return parser
+
 def main(argv):
     """Script entry point."""
 
