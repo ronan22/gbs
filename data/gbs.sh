@@ -84,7 +84,8 @@ __gbs ()
         --arch= --repository= --dist= --buildroot= --clean
         --include-all --extra-packs= --spec= --commit= --cache
         --skip-conf-repos --profile= --noinit --keep-packs --use-higher-deps
-        --not-export-source --clean-repos --define --baselib --disable-debuginfo
+        --not-export-source --clean-repos --define --baselibs --disable-debuginfo
+        --full-build --deps-build --snapshot
     "
     cr_opts="
         --profile= --tmpfs --ks-file

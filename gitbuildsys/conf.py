@@ -506,6 +506,11 @@ class Profile(object):
         self.common_user = user
         self.common_password = password
         self.repos = []
+        self.source = None
+        self.obs_prj = None
+        self.obs_repo = None
+        self.depends = None
+        self.pkgs = None
         self.obs = None
         self.buildroot = None
         self.buildconf = None
@@ -514,6 +519,26 @@ class Profile(object):
     def add_repo(self, repoconf):
         '''add a repo to repo list of the profile'''
         self.repos.append(repoconf)
+
+    def set_source(self, repoconf):
+        '''set a repo to the profile'''
+        self.source = repoconf
+
+    def set_obs_prj(self, prj):
+        '''set a obs project to the profile'''
+        self.obs_prj = prj
+
+    def set_obs_repo(self, repo):
+        '''set a obs repo to the profile'''
+        self.obs_repo = repo
+
+    def set_depends(self, deps):
+        '''set depends to the profile'''
+        self.depends = deps
+
+    def set_pkgs(self, pkgs):
+        '''set pkgs to the profile'''
+        self.pkgs = pkgs
 
     def set_obs(self, obsconf):
         '''set OBS api of the profile'''
@@ -646,7 +671,11 @@ class BizConfigManager(ConfigMgr):
             if g_passwd:
                 password = g_passwd
 
+        obs_prj = self.get_optional_item(name, 'obs_prj')
+        obs_repo = self.get_optional_item(name, 'obs_repo')
         profile = Profile(name, user, password)
+        profile.set_obs_prj(obs_prj)
+        profile.set_obs_repo(obs_repo)
 
         obs = self.get_optional_item(name, 'obs')
         if obs:
@@ -672,6 +701,24 @@ class BizConfigManager(ConfigMgr):
                 repoconf = SectionConf(profile, repo,
                                        self._get_url_options(repo))
                 profile.add_repo(repoconf)
+
+        source = self.get_optional_item(name, 'source')
+        if source:
+            repoconf = SectionConf(profile, source,
+                                   self._get_url_options(source))
+            profile.set_source(repoconf)
+
+        depends = self.get_optional_item(name, 'depends')
+        if depends:
+            repoconf = SectionConf(profile, depends,
+                                   self._get_url_options(depends))
+            profile.set_depends(repoconf)
+
+        pkgs = self.get_optional_item(name, 'pkgs')
+        if pkgs:
+            repoconf = SectionConf(profile, pkgs,
+                                   self._get_url_options(pkgs))
+            profile.set_pkgs(repoconf)
 
         profile.buildroot = self.get_optional_item(name, 'buildroot')
         if self.get_optional_item(name, 'buildconf'):
@@ -751,5 +798,54 @@ class BizConfigManager(ConfigMgr):
 
         return profile
 
+class MappingConfigParser(SafeConfigParser):
+    def __init__(self, file, defaults=None):
+        SafeConfigParser.__init__(self, defaults=None)
+        self._obs_meta = {}
+        self._prefix_meta = {}
+        self._repo_meta = {}
+        self._profile_meta = {}
+        self._source_meta = {}
+        self._osc_meta = {}
+        self.read(file)
+        kvs = self.items('obs_mapping')
+        for kv in kvs:
+            self._obs_meta[kv[0]] = kv[1]
+        kvs = self.items('prefix_mapping')
+        for kv in kvs:
+            self._prefix_meta[kv[0]] = kv[1]
+        kvs = self.items('repo_mapping')
+        for kv in kvs:
+            self._repo_meta[kv[0]] = kv[1]
+        kvs = self.items('profile_mapping')
+        for kv in kvs:
+            self._profile_meta[kv[0]] = kv[1]
+        kvs = self.items('source_mapping')
+        for kv in kvs:
+            self._source_meta[kv[0]] = kv[1]
+        kvs = self.items('osc_mapping')
+        for kv in kvs:
+            self._osc_meta[kv[0]] = kv[1]
+
+    def optionxform(self, optionstr):
+        return optionstr
+
+    def GetObsMapping(self):
+        return self._obs_meta
+
+    def GetPrefixMapping(self):
+        return self._prefix_meta
+
+    def GetRepoMapping(self):
+        return self._repo_meta
+
+    def GetProfileMapping(self):
+        return self._profile_meta
+
+    def GetSourceMapping(self):
+        return self._source_meta
+
+    def GetOscMapping(self):
+        return self._osc_meta
 
 configmgr = BizConfigManager()
