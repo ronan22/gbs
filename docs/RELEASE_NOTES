@@ -1,3 +1,29 @@
+Release notes for gbs 0.25.0
+==========================
+
+- Release Date: 2018-01
+
+- New feature and enhancements added:
+    * Add disable-debuginfo option which disable to generate debuginfo packages
+    * Add new function to phrase user/passwd in general part:
+      1.User can define user/passwd as global variables
+      2.User can use ${user}/${passwd} in other section
+    * Add depends subcommnd:
+      depends subcommand can output each package's reverse dependency
+      and save to the file
+    * Add --full-build and --deps-build features
+      1.With gbs build --full-build option, gbs will download the whole profile's
+      source codes except the local package(s) from remote snapshot and perform
+      building.
+      2.With gbs build --deps-build option, gbs will analyse the reverse dependency
+      of local package(s) and download them from remote snapshot and perform building.
+- Bug fix:
+    * Fix bugs when using --rdeps or --deps get wrong dependency
+    * Add --outdir-directly option for gbs export, use the directory from
+      gbs build which could get the macros in spec which defined in build.conf
+- Update dependencies:
+    * depanneur >= 0.16.0
+
 Release notes for gbs 0.24.10
 ==========================
 
