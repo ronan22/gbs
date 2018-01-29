@@ -11,6 +11,8 @@ Package: gbs
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends},
  python-pycurl,
+ python-requests,
+ python-lxml,
  sudo,
  osc (>= 0.155.0),
  git-buildpackage-rpm (>= 0.7.5-tizen20161231),

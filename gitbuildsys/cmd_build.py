@@ -26,18 +26,27 @@ import re
 import urlparse
 import glob
 import gzip
+import requests
+from lxml import etree
 import xml.etree.cElementTree as ET
+import xml.etree.ElementTree as ETP
+import subprocess
+import re
 
-from gitbuildsys.utils import Temp, RepoParser, read_localconf, \
-                              guess_spec, show_file_from_rev
+from gitbuildsys.utils import Temp, Workdir, RepoParser, read_localconf, \
+                              guess_spec, show_file_from_rev, \
+                              GitRefMappingParser, GitDirFinder, GerritNameMapper
 from gitbuildsys.errors import GbsError, Usage
-from gitbuildsys.conf import configmgr
+from gitbuildsys.conf import configmgr, MappingConfigParser, encode_passwd
 from gitbuildsys.safe_url import SafeURL
 from gitbuildsys.cmd_export import get_packaging_dir, config_is_true
 from gitbuildsys.log import LOGGER as log
+from gitbuildsys.oscapi import OSC, OSCError
+from gitbuildsys.log import DEBUG
 
 from gbp.rpm.git import GitRepositoryError, RpmGitRepository
 from gbp import rpm
+from gbp.rpm import SpecFile
 from gbp.errors import GbpError
 
 
@@ -158,7 +167,6 @@ def prepare_repos_and_build_conf(args, arch, profile):
                        'following repos:\n%s' % (arch, '\n'.join(repos)))
     cmd_opts += [('--repository=%s' % url.full) for url in repourls]
 
-    profile = get_profile(args)
     profile_name = formalize_build_conf(profile.name.replace('profile.', '', 1))
     distconf = os.path.join(TMPDIR, '%s.conf' % profile_name)
 
@@ -337,6 +345,222 @@ def get_local_archs(repos):
 
     return archs
 
+def create_autoconf(arch, snapshot, full_build):
+    """
+    Create ~/.gbs.conf.auto for user
+    """
+    url = ''
+    if snapshot:
+        if snapshot.startswith('tizen-3.0-mobile'):
+            profile_url = 'http://download.tizen.org/snapshots/tizen/3.0-mobile/' + snapshot
+        elif snapshot.startswith('tizen-3.0-tv'):
+            profile_url = 'http://download.tizen.org/snapshots/tizen/3.0-tv/' + snapshot
+        elif snapshot.startswith('tizen-3.0-wearable'):
+            profile_url = 'http://download.tizen.org/snapshots/tizen/3.0-wearable/' + snapshot
+        elif snapshot.startswith('tizen-3.0-ivi'):
+            profile_url = 'http://download.tizen.org/snapshots/tizen/3.0-ivi/' + snapshot
+        elif snapshot.startswith('tizen-unified'):
+            profile_url = 'http://download.tizen.org/snapshots/tizen/unified/' + snapshot
+        else:
+            raise GbsError('unkown snapshot: %s, please check' %snapshot)
+
+        res = requests.get(profile_url)
+        if res.status_code == 404:
+            raise GbsError('specified snapshot: %s does not exist, please check' %profile_url)
+
+    log.info("sync git-ref-mapping from review.tizen.org to get reference binary id")
+    refparser = GitRefMappingParser()
+    ref_meta = refparser.parse()
+
+    mapparser = MappingConfigParser('/usr/share/gbs/mapping.conf')
+    obs_meta = mapparser.GetObsMapping()
+    prefix_meta = mapparser.GetPrefixMapping()
+    repo_meta = mapparser.GetRepoMapping()
+    profile_meta = mapparser.GetProfileMapping()
+    source_meta = mapparser.GetSourceMapping()
+    osc_meta = mapparser.GetOscMapping()
+
+    content = ''
+    default = ''
+    if arch in ['armv7l', 'aarch64']:
+        default = 'profile.unified_standard'
+    elif arch in ['i586', 'x86_64']:
+        default = 'profile.unified_emulator'
+    else:
+        default = 'profile.error'
+
+    content += '[general]\nfallback_to_native = true\nprofile = ' + default + '\n'
+    repos_map = {}
+    for k, v in obs_meta.iteritems():
+        ref_id = ref_meta.get(v)
+        if ref_id == None:
+            ref_id = 'latest'
+
+        prefix = prefix_meta.get(k)
+        if prefix == None:
+            continue
+
+        if ref_id == 'latest':
+           prefix = os.path.dirname(prefix) + '/'
+
+        url = prefix + ref_id
+        if snapshot:
+            if os.path.dirname(url) == os.path.dirname(profile_url):
+                url = profile_url
+
+        repos = repo_meta.get(k)
+        if repos == None:
+            continue
+
+
+        repotypes = repos.split(',')
+        bid = os.path.basename(url)
+        for repo in repotypes:
+            repos_map[k + '_' + repo.replace('-', '_')] = url + '/repos/' + repo + '/packages/'
+            content += '[repo.' + k + '_' + repo + ']\n'
+            content += 'url = ' + url + '/repos/' + repo + '/packages/\n'
+            content += '[repo.' + k + '_' + repo + '_source]\n'
+            content += 'url = ' + url + '/builddata/manifest/' + bid + '_' + repo + '.xml\n'
+            content += '[repo.' + k + '_' + repo + '_debug]\n'
+            content += 'url = ' + url + '/repos/' + repo + '/debug/\n'
+            content += '[repo.' + k + '_' + repo + '_depends]\n'
+            content += 'url = ' + url + '/builddata/depends/dep_graph/' + repo + '/' + arch + '/\n'
+            content += '[repo.' + k + '_' + repo + '_pkgs]\n'
+            content += 'url = ' + url + '/builddata/depends/' + v + '_' + repo + '_' + arch + '_revpkgdepends.xml\n'
+
+    for k, v in profile_meta.iteritems():
+        content += '[profile.' + k + ']\n'
+        if full_build:
+            v = v[:v.index('repo.' + k) - 1]
+
+        content += 'repos = ' + v + '\n'
+        source = source_meta.get(k)
+        if source != None:
+            attrs = source.split(',')
+            content += 'source = ' + attrs[0] + '\n'
+            content += 'depends = ' + attrs[1] + '\n'
+            content += 'pkgs = ' + attrs[2] + '\n'
+
+        content += 'obs = obs.tizen\n'
+        v = osc_meta.get(k)
+        if v != None:
+            attrs = v.split(',')
+            content += 'obs_prj = ' + attrs[0] + '\n'
+            content += 'obs_repo = ' + attrs[1] + '\n'
+
+    content += '[obs.tizen]\nurl = https://build.tizen.org\nuser = obs_viewer\npasswd = obs_viewer\n'
+
+    fpath = os.path.expanduser('~/.gbs.conf.auto')
+    with open(fpath, 'w') as wfile:
+        wfile.write(content)
+
+    configmgr.add_conf(fpath)
+
+    return repos_map
+
+def sync_source(exclude_pkgs, pkgs, manifest_url, path):
+    if pkgs != None:
+        if len(pkgs) == 0:
+            return
+
+    cmd = 'repo init -u https://git.tizen.org/cgit/scm/manifest -b tizen -m unified_standard.xml'
+    with Workdir(path):
+        ret = os.system(cmd)
+        if ret != 0:
+            raise GbsError("failed to run %s in %s" % (' '.join(cmd), path))
+
+    out_file = path + '/.repo/manifests/unified_standard.xml.new'
+    in_file = path + '/.repo/manifests/unified_standard.xml'
+    with open(out_file, 'w') as f:
+        with open(in_file, 'r') as i:
+            for line in i.readlines():
+                if 'metadata.xml' not in line and 'prebuilt.xml' not in line:
+                    f.write(line)
+
+    shutil.move(out_file, in_file)
+    r = requests.get(manifest_url)
+    if r.status_code == 404:
+        log.error("manifest %s not found" %manifest_url)
+        return
+
+    old = path + '/.repo/manifests/unified/standard/projects.xml'
+    new = path + '/.repo/manifests/unified/standard/projects.xml.new'
+    with open(new, "w") as f:
+        f.write(r.content)
+
+    log.info('use %s as projects.xml' %manifest_url)
+    with open(new, 'r') as f:
+        with open(old, 'w') as i:
+            for line in f.readlines():
+                if exclude_pkgs != None:
+                    if 'revision' in line:
+                        k = line.index('"', line.index('path'))
+                        abs_path = line[k + 1:line.index('"', k + 1)]
+                        if abs_path in exclude_pkgs:
+                            continue
+
+                    i.write(line)
+
+                if pkgs != None:
+                    if 'revision' in line:
+                        k = line.index('"', line.index('path'))
+                        abs_path = line[k + 1:line.index('"', k + 1)]
+                        if abs_path not in pkgs:
+                            continue
+
+                    i.write(line)
+
+    cmd = 'repo sync'
+    with Workdir(path):
+        ret = os.system(cmd)
+        if ret != 0:
+            raise GbsError("failed to run %s in %s" % (' '.join(cmd), path))
+
+def prepare_fullbuild_source(profile, pkgs, url, download_path):
+    """
+    prepare full build source
+    """
+    sync_source(pkgs, None, url, download_path)
+
+def prepare_depsbuild_source(gnmapper, profile, arch, pkgs, url, download_path):
+    """
+    prepare deps build source
+    """
+    deps = set([])
+    deps_path = []
+    try:
+        for pkg in pkgs:
+            depurl = profile.depends.url + pkg + '.full_edges.vis_input.js'
+            r = requests.get(depurl)
+            if r.status_code == 404:
+                log.error('get depends from %s failed' %depurl)
+                continue
+
+            match = re.findall("label: '.*'", r.content)
+            if not match:
+                continue
+
+            for m in match:
+                dep = m[m.index("'") + 1:m.rindex("'")]
+                if dep == pkg:
+                    continue
+
+                if dep not in deps:
+                    deps.add(dep)
+
+        log.info("what depends on number:%d --> %s" %(len(deps), deps))
+        for pkg in deps:
+            gerrit_name = gnmapper.get_gerritname_by_obsname(pkg)
+            if gerrit_name == None:
+                log.warning('can not get gerrit name for pkg:%s' %pkg)
+                continue
+
+            deps_path.append(gnmapper.get_gerritname_by_obsname(pkg))
+    except OSCError, err:
+        raise GbsError(str(err))
+
+    sync_source(None, deps_path, url, download_path)
+
 def main(args):
     """gbs build entry point."""
 
@@ -359,6 +583,12 @@ def main(args):
             raise GbsError("git project can't be found for --spec, "
                            "give it in argument or cd into it")
 
+    repos_map = {}
+    if not args.conf:
+        if args.full_build or args.deps_build:
+            repos_map = create_autoconf(args.arch, args.snapshot, args.full_build)
+            log.info("Create ~/.gbs.conf.auto using reference binary id")
+
     read_localconf(workdir)
 
     hostarch = os.uname()[4]
@@ -373,6 +603,79 @@ def main(args):
                        (buildarch, ','.join(SUPPORTEDARCHS)))
 
     profile = get_profile(args)
+    if args.full_build or args.deps_build:
+        if profile.source == None:
+            raise GbsError('full build/deps build option must specify source repo in gbs.conf')
+
+        download_path = Temp(prefix=os.path.expanduser('~/gbs-build'),
+                     directory=True)
+        local_pkgs = []
+        gitf = GitDirFinder(workdir)
+
+        profile_name = formalize_build_conf(profile.name.replace('profile.', '', 1))
+        profile_repo = repos_map.get(profile_name)
+
+        cache = Temp(prefix=os.path.join(TMPDIR, 'gbscache'),
+                     directory=True)
+        cachedir = cache.path
+        repoparser = RepoParser([SafeURL(profile_repo)], cachedir)
+        distconf = os.path.join(download_path.path, '%s.conf' % profile_name)
+
+        if repoparser.buildconf is None:
+            raise GbsError('failed to get build conf from repos, please '
+                           'use snapshot repo or specify build config using '
+                           '-D option')
+        else:
+            buildconf = repoparser.buildconf
+        try:
+            shutil.copy(buildconf, distconf)
+            log.info('build conf has been downloaded at:\n      %s' \
+                       % distconf)
+        except IOError, err:
+            raise GbsError("Failed to copy build conf: %s" % (str(err)))
+
+        profile.buildconf = distconf
+
+        r = requests.get(profile.pkgs.url)
+        if r.status_code == 404:
+            raise GbsError('get pkg xml from %s failed' %profile.pkgs.url)
+
+        exclude_pkgs = []
+        if args.exclude:
+            exclude_pkgs = args.exclude.split(',')
+        gnmapper = GerritNameMapper(r.content, repoparser.primaryxml)
+        for spec_file in gitf.specs:
+            try:
+                spec = SpecFile(spec_file)
+                if spec.name in exclude_pkgs:
+                    continue
+
+                if args.full_build:
+                    pkg = gnmapper.get_gerritname_by_srcname(spec.name)
+                else:
+                    pkg = gnmapper.get_pkgname_by_srcname(spec.name)
+                if pkg != None:
+                    local_pkgs.append(pkg)
+                else:
+                   log.error('package %s parse failed' %spec.name)
+            except GbpError, err:
+                log.warning('gbp parse spec failed. %s' % err)
+
+        if args.full_build:
+            prepare_fullbuild_source(profile, local_pkgs, profile.source.url, download_path.path)
+        else:
+            if len(local_pkgs) == 0:
+                raise GbsError('deps build option must has local packages')
+
+            prepare_depsbuild_source(gnmapper, profile, args.arch, local_pkgs, profile.source.url, download_path.path)
+
+        for path in gitf.paths:
+            shutil.copytree(path, os.path.join(download_path.path, os.path.basename(path)))
+
+        workdir = download_path.path
+        curdir = os.getcwd()
+        os.chdir(workdir)
+
     if args.buildroot:
         build_root = args.buildroot
     elif 'TIZEN_BUILD_ROOT' in os.environ:
@@ -440,6 +743,8 @@ def main(args):
 
     if args.conf and args.conf != '.gbs.conf':
         fallback = configmgr.get('fallback_to_native')
+    elif args.full_build or args.deps_build:
+        fallback = configmgr.get('fallback_to_native')
     else:
         fallback = ''
     if args.fallback_to_native or config_is_true(fallback):
@@ -462,6 +767,8 @@ def main(args):
 
     log.debug("running command: %s" % ' '.join(cmd))
     retcode = os.system(' '.join(cmd))
+    if args.full_build or args.deps_build:
+        os.chdir(curdir)
     if retcode != 0:
         raise GbsError('some packages failed to be built')
     else:

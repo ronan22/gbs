@@ -289,6 +289,7 @@ class RepoParser(object):
         self.cachedir = cachedir
         self.repourls = defaultdict(list)
         self.buildconf = None
+        self.primaryxml = None
         self.standardrepos = []
         self.urlgrabber = URLGrabber()
 
@@ -441,6 +442,20 @@ class RepoParser(object):
                 fh_gz.close()
                 buildconf_fh.close()
                 self.buildconf = buildconf_file
+        for elem in root.findall('%sdata' % xmlns):
+            if elem.attrib['type'] == 'primary':
+                location_elem = elem.find('%slocation' % xmlns)
+                break
+        if location_elem is not None and 'href' in location_elem.attrib:
+            primary_url = baseurl.pathjoin(location_elem.attrib['href'])
+            fname = self.fetch(primary_url)
+            if fname:
+                if fname[-3:] == '.gz':
+                    fh_gz = gzip.open(fname, 'r')
+                else:
+                    fh_gz = open(fname, 'r')
+                self.primaryxml = fh_gz.read()
+                fh_gz.close()
 
     def parse(self, remotes):
         """Parse each remote repo, try to fetch build.xml and build.conf"""
@@ -517,6 +532,141 @@ class RepoParser(object):
 
         return filter_valid_repo(repos)
 
+class GitRefMappingParser(object):
+    """git-ref-mapping parser for get reference binary id."""
+
+    def __init__(self, giturl='https://git.tizen.org/cgit/scm/git-ref-mapping'):
+        self._giturl = giturl
+
+    def parse(self):
+        cmd = []
+        workdir = os.path.expanduser('~/.ref-gbs/git-ref-mapping/')
+        refxml = os.path.expanduser('~/.ref-gbs/git-ref-mapping/git-ref-mapping.xml')
+        if os.path.exists(refxml):
+            cmd = ['git', 'pull']
+        else:
+            if not os.path.exists(workdir):
+                    os.makedirs(workdir)
+
+            cmd = ['git', 'clone', self._giturl, workdir]
+        try:
+            with Workdir(workdir):
+                output = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+                output.wait()
+        except (subprocess.CalledProcessError, OSError):
+            raise GbsError("failed to run %s in %s" % (' '.join(cmd), workdir))
+
+        try:
+            etree = ET.parse(refxml)
+        except ET.ParseError:
+            log.warning('Not well formed xml: %s' % refxml)
+            return
+
+        root = etree.getroot()
+        meta = {}
+        for elem in root.iter(tag='branch'):
+            attr = elem.attrib
+            if attr['name'] in ['tizen_unified', 'tizen_3.0']:
+                obs_prj = attr['OBS_project']
+                #obs_prj = obs_prj.replace(':', '')
+                #obs_prj = obs_prj.lower()
+                ref_prj = attr['OBS_staging_project']
+                arr = ref_prj.split(':')
+                meta[obs_prj] = arr[len(arr) - 1]
+
+        return meta
+
+class GitDirFinder(object):
+    def __init__(self, dir=None):
+        self.paths = []
+        self.specs = []
+        if dir:
+            self.find(dir)
+
+    def find(self, dir):
+        if os.path.isdir(os.path.join(dir, '.git')):
+                self.paths.append(dir)
+                f = glob.glob('%s/packaging/*.spec' % dir)
+                self.specs.extend(f)
+                return
+
+        files = os.listdir(dir)
+        for file in files:
+            d = os.path.join(dir, file)
+            git_d = os.path.join(d, '.git')
+            if os.path.isdir(d):
+                if os.path.isdir(git_d):
+                    self.paths.append(d)
+                    f = glob.glob('%s/packaging/*.spec' % d)
+                    self.specs.extend(f)
+                else:
+                    self.find(d)
+
+class GerritNameMapper(object):
+    def __init__(self, pkgxml, primaryxml):
+        self._pkg2src = {}
+        self._pkg2subpkgs = {}
+        self._src2gerrit = {}
+        self._src2pkg = {}
+        self.parse_pkgxml(pkgxml)
+        self.parse_primaryxml(primaryxml)
+
+    def parse_pkgxml(self, pkgxml):
+        try:
+            root = ET.fromstring(pkgxml)
+        except ET.ParseError:
+            log.warning('Not well formed xml pkgxml')
+            return
+
+        lst_node = root.getiterator("package")
+        for node in lst_node:
+            if node.attrib.has_key("name"):
+                for child in node.getchildren():
+                    if child.tag == 'source':
+                        self._pkg2src[node.attrib['name']] = child.text
+                        self._src2pkg[child.text] = node.attrib['name']
+                    if child.tag == 'subpkg':
+                        if child.text.endswith('debugsource') or child.text.endswith('debuginfo'):
+                            continue
+
+                        self._pkg2subpkgs[node.attrib['name']] = child.text
+                        break
+
+    def parse_primaryxml(self, primaryxml):
+        try:
+            root = ET.fromstring(primaryxml)
+        except ET.ParseError:
+            log.warning('Not well formed xml primaryxml')
+            return
+
+        xmlns = re.sub('metadata$', '', root.tag)
+        for elem in root.findall('%spackage' % xmlns):
+            name = elem.find('%sname' % xmlns).text
+            vcs = elem.find('%sversion' % xmlns).attrib['vcs']
+            self._src2gerrit[name] = vcs[:vcs.index('#')]
+
+    def get_gerritname_by_obsname(self, obsname):
+        src = self._pkg2src.get(obsname)
+        if src == None:
+            return None
+
+        name = self._src2gerrit.get(src)
+        if name == None:
+            src = self._pkg2subpkgs.get(obsname)
+            name = self._src2gerrit.get(src)
+
+        return name
+
+    def get_gerritname_by_srcname(self, srcname):
+        name = self._src2gerrit.get(srcname)
+        if name == None:
+            pkg = self._src2pkg.get(srcname)
+            name = self.get_gerritname_by_obsname(pkg)
+
+        return name
+
+    def get_pkgname_by_srcname(self, srcname):
+        return self._src2pkg.get(srcname)
 
 def read_localconf(workdir):
     """Read local configuration file from project directory."""

@@ -19,6 +19,8 @@ URL:        http://www.tizen.org
 Source0:    %{name}_%{version}.tar.gz
 Requires:   python >= 2.6
 Requires:   python-pycurl
+Requires:   python-requests
+Requires:   python-lxml
 Requires:   sudo
 Requires:   osc >= 0.155.0
 Requires:   tizen-gbp-rpm >= 20161231
@@ -116,6 +118,7 @@ mkdir -p %{buildroot}/%{_prefix}/share/gbs
 install -m644 docs/gbs.1 %{buildroot}/%{_prefix}/share/man/man1
 install -m644 data/initrd %{buildroot}/%{_prefix}/share/gbs
 install -m644 data/vmlinuz %{buildroot}/%{_prefix}/share/gbs
+install -m644 data/mapping.conf %{buildroot}/%{_prefix}/share/gbs
 
 # Install Jenkins Jobs
 for job_name in $(ls jenkins-jobs/configs)
