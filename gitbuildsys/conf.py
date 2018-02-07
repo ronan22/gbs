@@ -407,6 +407,13 @@ url = http://download.tizen.org/releases/daily/trunk/ivi/latest/
                 return True
         return False
 
+    def get_optional_item(self, section, option, default=None):
+        '''return default if section.option does not exist'''
+        try:
+            return self.get(option, section)
+        except errors.ConfigError:
+            return default
+
 
     def get(self, opt, section='general'):
         'get item value. return plain text of password if item is passwd'
@@ -635,13 +642,6 @@ class BizConfigManager(ConfigMgr):
         log.warning('subcommand oriented style of config is deprecated. '
                     'Please check %s, a new profile oriented style of config '
                     ' which was converted from your current settings.' % fname)
-
-    def get_optional_item(self, section, option, default=None):
-        '''return default if section.option does not exist'''
-        try:
-            return self.get(option, section)
-        except errors.ConfigError:
-            return default
 
     def _get_url_options(self, section_id):
         '''get url/user/passwd from a section'''
