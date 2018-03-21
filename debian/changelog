@@ -1,3 +1,11 @@
+gbs (0.25.1) unstable; urgency=high
+  * upgrade to gbs v0.25.1, which contains the following features:
+    * bug fix:
+      - Fix bugs when linux usernames including backslash
+      - Fix bugs the instance of ConfigMgr class can not access get_optional_item method
+        in get function
+ -- Ren Jingui <jingui.ren@samsung.com>  Fri, 23 Mar 2018 12:30:00 +0800
+
 gbs (0.25.0) unstable; urgency=high
   * upgrade to gbs v0.25.0, which contains the following features:
     * New feature and enhancements added:
