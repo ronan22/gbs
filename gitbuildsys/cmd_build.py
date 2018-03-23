@@ -198,9 +198,10 @@ def prepare_repos_and_build_conf(args, arch, profile):
     if not distconf.endswith('.conf') or '-' in os.path.basename(distconf):
         raise GbsError("build config file must end with .conf, and can't "
                        "contain '-'")
-    dist = os.path.basename(distconf)[:-len('.conf')]
+    dist = "'"+os.path.basename(distconf)[:-len('.conf')]+"'"
     cmd_opts += ['--dist=%s' % dist]
-    cmd_opts += ['--configdir=%s' % os.path.dirname(distconf)]
+    path = "'"+os.path.dirname(distconf)+"'"
+    cmd_opts += ['--configdir=%s' % path]
 
     return cmd_opts
 
@@ -716,7 +717,7 @@ def main(args):
     else:
         cmd += ['--noinit']
 
-    cmd += ['--path=%s' % workdir]
+    cmd += ['--path=%s' % "'"+str(workdir)+"'"]
 
     if args.ccache:
         cmd += ['--ccache']

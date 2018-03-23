@@ -254,13 +254,13 @@ def main(args):
 
     if args.commit and args.include_all:
         raise Usage("--commit can't be specified together with --include-all")
-
+    log.debug("export begin")
     workdir = args.gitdir
     try:
         repo = RpmGitRepository(workdir)
     except GitRepositoryError, err:
         raise GbsError(str(err))
-
+    log.debug("read repo path")
     utils.read_localconf(repo.path)
     utils.git_status_checker(repo, args)
     workdir = repo.path
@@ -276,10 +276,11 @@ def main(args):
         commit = 'HEAD'
     orphan_packaging = configmgr.get('packaging_branch', 'orphan-devel')
     spec_commit_id = orphan_packaging if orphan_packaging else commit
+    log.debug("check packaging_dir")
     packaging_dir = get_packaging_dir(args)
     main_spec, rest_specs = utils.guess_spec(workdir, packaging_dir,
                                              args.spec, spec_commit_id)
-
+    log.debug("check outdir")
     if args.outdir:
         outdir = args.outdir
     else:
@@ -290,7 +291,7 @@ def main(args):
             raise GbsError('no write permission to outdir: %s' % outdir)
     else:
         mkdir_p(outdir)
-
+    log.debug("check tmpdir")
     tmpdir = configmgr.get('tmpdir', 'general')
     tempd = utils.Temp(prefix=os.path.join(tmpdir, '.gbs_export_'),
                        directory=True)
@@ -336,7 +337,7 @@ def main(args):
         else:
             outdir = "%s/%s-%s-%s" % (outdir, spec.name, spec.upstreamversion,
                                       spec.release)
-
+    log.debug("check outdir")
     if os.path.exists(outdir):
         if not os.access(outdir, os.W_OK|os.X_OK):
             raise GbsError('no permission to update outdir: %s' % outdir)
