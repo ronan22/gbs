@@ -1,3 +1,9 @@
+gbs (0.25.2) unstable; urgency=high
+  * upgrade to gbs v0.25.2, which contains the following features:
+    * bug fix:
+      - Fix umount directories inside build root after build is finished
+ -- Ren Jingui <jingui.ren@samsung.com>  Fri, 11 May 2018 12:30:00 +0800
+
 gbs (0.25.1) unstable; urgency=high
   * upgrade to gbs v0.25.1, which contains the following features:
     * bug fix:

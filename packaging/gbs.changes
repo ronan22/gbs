@@ -1,3 +1,8 @@
+* Fri May 11 2018 Ren Jingui <jingui.ren@samsung.com> 0.25.2
+  * upgrade to gbs v0.25.2, which contains the following features:
+    * bug fix
+      - Fix umount directories inside build root after build is finished
+
 * Fri Mar 23 2018 Ren Jingui <jingui.ren@samsung.com> 0.25.1
   * upgrade to gbs v0.25.1, which contains the following features:
     * bug fix

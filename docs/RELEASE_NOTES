@@ -1,3 +1,13 @@
+Release notes for gbs 0.25.2
+==========================
+
+- Release Date: 2018-05
+
+- Bug fix:
+    * Fix umount directories inside build root after build is finished
+- Update dependencies:
+    * depanneur >= 0.16.2
+
 Release notes for gbs 0.25.1
 ==========================
 
