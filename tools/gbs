@@ -326,10 +326,10 @@ def build_parser(parser):
                         'this file will be skipped to be built.')
     group.add_argument('--deps', action='store_true',
                         help='build specified packages and all packages '
-                        'they depend on')
+                        'they depend on, such as A depends B,C,D, first build B,C,D and then build A')
     group.add_argument('--rdeps', action='store_true',
                         help='build specified packages and all packages '
-                        'depend on them')
+                        'depend on them, such as A B C depends D, first build D and then build A,B,C')
     group.add_argument('--disable-debuginfo', action='store_true',
                         help='Do not create debuginfo packages when building')
 
