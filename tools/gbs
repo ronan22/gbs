@@ -575,9 +575,9 @@ def devel_parser(parser):
 
 @subparser
 def depends_parser(parser):
-    """Output depends of packages
+    """Output reverse depends of packages
     Examples:
-      $ gbs depends -A i586   # generate depends of packages for i586
+      $ gbs depends -A i586   # generate reverse depends of packages for i586
     """
 
     parser.add_argument('gitdir', nargs='?', type=os.path.abspath,
@@ -604,7 +604,7 @@ def depends_parser(parser):
                         'only rpm-md format is supported')
     group.add_argument('--debug', action='store_true', help='debug output')
     group.add_argument('-o', '--output',
-                        help='specify output directory for depends files')
+                        help='specify output directory for reverse depends files')
 
     group = parser.add_argument_group('depends env options')
     group.add_argument('-B', '--buildroot',
