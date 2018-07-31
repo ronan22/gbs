@@ -1,3 +1,16 @@
+Release notes for gbs 0.25.3
+==========================
+
+- Release Date: 2018-08
+
+- Bug fix:
+    * Fix deb package build error
+    * Remove chroot memory limit on x86_64
+- New feature and enhancements added:
+	* Optimize gbs export process
+- Update dependencies:
+    * depanneur >= 0.16.3
+
 Release notes for gbs 0.25.2
 ==========================
 

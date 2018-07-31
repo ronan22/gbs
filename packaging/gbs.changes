@@ -1,3 +1,11 @@
+* Fri Aug 3 2018 Ren Jingui <jingui.ren@samsung.com> 0.25.3
+  * upgrade to gbs v0.25.3, which contains the following features:
+    * bug fix
+      - Fix deb package build error
+      - Remove chroot memory limit on x86_64
+	* New
+	  - Optimize gbs export process
+
 * Fri May 11 2018 Ren Jingui <jingui.ren@samsung.com> 0.25.2
   * upgrade to gbs v0.25.2, which contains the following features:
     * bug fix
