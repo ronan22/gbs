@@ -1,3 +1,12 @@
+gbs (0.25.3) unstable; urgency=high
+  * upgrade to gbs v0.25.3, which contains the following features:
+    * Bug fix:
+      - Fix deb package build error
+      - Remove chroot memory limit on x86_64
+    * New feature and enhancements added:
+      - Optimize gbs export process
+ -- Ren Jingui <jingui.ren@samsung.com>  Fri, 3 Aug 2018 12:30:00 +0800
+
 gbs (0.25.2) unstable; urgency=high
   * upgrade to gbs v0.25.2, which contains the following features:
     * bug fix:
