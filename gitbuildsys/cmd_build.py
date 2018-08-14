@@ -241,6 +241,8 @@ def prepare_depanneur_opts(args):
         cmd_opts += ['--keepgoing=%s' % args.keepgoing]
     if args.disable_debuginfo:
         cmd_opts += ['--disable-debuginfo']
+    if args.style:
+        cmd_opts += ['--style=%s' % args.style]
     #
     if args.package_list:
         package_list = args.package_list.split(',')

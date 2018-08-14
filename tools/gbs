@@ -332,7 +332,8 @@ def build_parser(parser):
                         'depend on them, such as A B C depends D, first build D and then build A,B,C')
     group.add_argument('--disable-debuginfo', action='store_true',
                         help='Do not create debuginfo packages when building')
-
+    group.add_argument('--style', default='git',
+                        help='specify source type: git, or tar, default is git')
     parser.set_defaults(alias="lb")
     return parser
 
