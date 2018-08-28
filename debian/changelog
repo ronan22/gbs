@@ -1,3 +1,13 @@
+gbs (0.25.4) unstable; urgency=high
+  * upgrade to gbs v0.25.4, which contains the following features:
+    * Bug fix:
+      - Fix build error on x86_64 with expand error
+      - Fix bugs of perl tempdir function call
+      - Remove mount info check after build finished
+    * New feature and enhancements added:
+      - Add --style=tar feature, which can build with gbs export source
+ -- Ren Jingui <jingui.ren@samsung.com>  Fri, 31 Aug 2018 12:30:00 +0800
+
 gbs (0.25.3) unstable; urgency=high
   * upgrade to gbs v0.25.3, which contains the following features:
     * Bug fix:
