@@ -1,3 +1,9 @@
+gbs (0.25.5) unstable; urgency=high
+  * upgrade to gbs v0.25.5, which contains the following features:
+    * Bug fix:
+      - Fix file conflicts when package install
+ -- Ren Jingui <jingui.ren@samsung.com>  Thu, 27 Sep 2018 12:30:00 +0800
+
 gbs (0.25.4) unstable; urgency=high
   * upgrade to gbs v0.25.4, which contains the following features:
     * Bug fix:

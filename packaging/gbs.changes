@@ -1,3 +1,8 @@
+* Thu Sep 27 2018 Ren Jingui <jingui.ren@samsung.com> 0.25.5
+  * upgrade to gbs v0.25.5, which contains the following features:
+    * bug fix
+      - Fix file conflicts when package install
+
 * Fri Aug 31 2018 Ren Jingui <jingui.ren@samsung.com> 0.25.4
   * upgrade to gbs v0.25.4, which contains the following features:
     * bug fix
