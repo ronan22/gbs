@@ -1,3 +1,9 @@
+gbs (0.25.6) unstable; urgency=high
+  * upgrade to gbs v0.25.6, which contains the following features:
+    * New feature and enhancements added:
+      - Speed up the download packages when use https
+ -- Ren Jingui <jingui.ren@samsung.com>  Wed, 31 Oct 2018 12:30:00 +0800
+
 gbs (0.25.5) unstable; urgency=high
   * upgrade to gbs v0.25.5, which contains the following features:
     * Bug fix:

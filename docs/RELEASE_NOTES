@@ -1,3 +1,11 @@
+Release notes for gbs 0.25.6
+==========================
+
+- Release Date: 2018-10
+
+- New feature and enhancements added:
+    * Speed up the download packages when use https
+
 Release notes for gbs 0.25.5
 ==========================
 
