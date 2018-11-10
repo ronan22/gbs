@@ -1,3 +1,12 @@
+Release notes for gbs 0.25.7
+==========================
+
+- Release Date: 2018-11
+
+- New feature and enhancements added:
+    * Optimize package dependence analyse
+    * Optimize circular dependency check
+
 Release notes for gbs 0.25.6
 ==========================
 
