@@ -1,3 +1,10 @@
+gbs (0.25.7) unstable; urgency=high
+  * upgrade to gbs v0.25.7, which contains the following features:
+    * New feature and enhancements added:
+      - Optimize package dependence analyse
+      - Optimize circular dependency check
+ -- Ren Jingui <jingui.ren@samsung.com>  Wed, 14 Nov 2018 12:30:00 +0800
+
 gbs (0.25.6) unstable; urgency=high
   * upgrade to gbs v0.25.6, which contains the following features:
     * New feature and enhancements added:
