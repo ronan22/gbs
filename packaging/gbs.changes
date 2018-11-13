@@ -1,6 +1,6 @@
 * Wed Nov 14 2018 Ren Jingui <jingui.ren@samsung.com> 0.25.7
   * upgrade to gbs v0.25.7, which contains the following features:
-    * New
+    * bug fix
       - Optimize package dependence analyse
       - Optimize circular dependency check
 
