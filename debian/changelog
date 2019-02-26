@@ -1,3 +1,12 @@
+gbs (0.25.8) unstable; urgency=high
+  * upgrade to gbs v0.25.8, which contains the following features:
+    * New feature and enhancements added:
+      - Support new platform Ubuntu 18.04
+      - Upgrade osc version to 0.162.2
+      - Upgrade git-buildpackage version to 0.9.9
+      - Change 'struct ucontent' to 'ucontent_t' in qemu-arm-static
+ -- Ren Jingui <jingui.ren@samsung.com>  Fri, 15 Feb 2019 12:30:00 +0800
+
 gbs (0.25.7) unstable; urgency=high
   * upgrade to gbs v0.25.7, which contains the following features:
     * New feature and enhancements added:
