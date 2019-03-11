@@ -79,6 +79,7 @@ Release notes for gbs 0.25.1
 - Bug fix:
     * Fix bugs when linux usernames including backslash
     * Fix bugs the instance of ConfigMgr class can not access get_optional_item method
+      in get function
 - Update dependencies:
     * depanneur >= 0.16.1
 

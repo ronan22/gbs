@@ -22,7 +22,7 @@ Requires:   python-pycurl
 Requires:   python-requests
 Requires:   python-lxml
 Requires:   sudo
-Requires:   osc >= 0.155.0
+Requires:   osc >= 0.132.6
 Requires:   tizen-gbp-rpm >= 20161231
 Requires:   depanneur >= 0.16.5
 
@@ -48,7 +48,7 @@ Summary:       GBS APIs
 Conflicts:     gbs < 0.15
 Requires:      python
 Requires:      python-pycurl
-Requires:      osc >= 0.155.0
+Requires:      osc >= 0.132.6
 Requires:      git-buildpackage-rpm
 
 %description api

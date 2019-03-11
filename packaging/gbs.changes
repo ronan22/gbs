@@ -49,6 +49,7 @@
     * bug fix
       - Fix bugs when linux usernames including backslash
       - Fix bugs the instance of ConfigMgr class can not access get_optional_item method
+        in get function
 
 * Fri Jan 26 2018 Wang Jun <junbill.wang@samsung.com> 0.25.0
   * upgrade to gbs v0.25.0, which contains the following features:
