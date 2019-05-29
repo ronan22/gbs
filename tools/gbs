@@ -334,6 +334,8 @@ def build_parser(parser):
                         help='Do not create debuginfo packages when building')
     group.add_argument('--style', default='git',
                         help='specify source type: git, or tar, default is git')
+    group.add_argument('--export-only', action='store_true',
+                        help='only export, not building')
     parser.set_defaults(alias="lb")
     return parser
 

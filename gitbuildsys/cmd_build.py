@@ -243,6 +243,8 @@ def prepare_depanneur_opts(args):
         cmd_opts += ['--disable-debuginfo']
     if args.style:
         cmd_opts += ['--style=%s' % args.style]
+    if args.export_only:
+        cmd_opts += ['--export-only']
     #
     if args.package_list:
         package_list = args.package_list.split(',')
