@@ -1,3 +1,8 @@
+* Fri Aug 30 2019 Wang Biao <biao716.wang@samsung.com> 0.25.9
+  * upgrade to gbs v0.25.9, which contains the following features:
+    * New
+      - add --export-only feature
+
 * Fri Feb 15 2019 Ren Jingui <jingui.ren@samsung.com> 0.25.8
   * upgrade to gbs v0.25.8, which contains the following features:
     * New
@@ -5,7 +10,6 @@
       - Upgrade osc version to 0.162.2
       - Upgrade git-buildpackage version to 0.9.9
       - Change 'struct ucontent' to 'ucontent_t' in qemu-arm-static
-
 * Wed Nov 14 2018 Ren Jingui <jingui.ren@samsung.com> 0.25.7
   * upgrade to gbs v0.25.7, which contains the following features:
     * bug fix
