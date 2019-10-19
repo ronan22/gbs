@@ -27,7 +27,7 @@ def get_version(mod_name):
     """Get version from module __init__.py"""
     path = os.path.join(mod_name, "__init__.py")
     if not os.path.isfile(path):
-        print 'No %s version file found' % path
+        print('No %s version file found' % path)
         sys.exit(1)
 
     content = open(path).read()
@@ -36,7 +36,7 @@ def get_version(mod_name):
     if match:
         return match.group(1)
 
-    print 'Unable to find version in %s' % path
+    print('Unable to find version in %s' % path)
     sys.exit(1)
 
 check_debian()

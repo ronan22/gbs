@@ -36,7 +36,7 @@ def main(args):
 
     try:
         repo = RpmGitRepository(args.gitdir)
-    except GitRepositoryError, err:
+    except GitRepositoryError as err:
         raise GbsError(str(err))
 
     packaging_dir = get_packaging_dir(args)

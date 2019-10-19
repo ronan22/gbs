@@ -111,7 +111,7 @@ def prepare_repos_and_build_conf(args, arch, profile):
                         log.warning('local repo: %s does not exist' % repo)
                         continue
                 opt_repo = SafeURL(repo)
-            except ValueError, err:
+            except ValueError as err:
                 log.warning('Invalid repo %s: %s' % (repo, str(err)))
             else:
                 repos.append(opt_repo)
@@ -148,7 +148,7 @@ def prepare_repos_and_build_conf(args, arch, profile):
                        % distconf)
     try:
         shutil.copy(buildconf, distconf)
-    except IOError, err:
+    except IOError as err:
         raise GbsError("Failed to copy build conf: %s" % (str(err)))
 
     if not os.path.exists(distconf):

@@ -83,7 +83,7 @@ def main(args):
 
     try:
         repo = RpmGitRepository(args.gitdir)
-    except GitRepositoryError, err:
+    except GitRepositoryError as err:
         raise GbsError(str(err))
 
     tmp = Temp(prefix='gbp_', dirn=configmgr.get('tmpdir', 'general'),

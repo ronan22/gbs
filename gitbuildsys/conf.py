@@ -276,7 +276,7 @@ url = http://download.tizen.org/releases/daily/trunk/ivi/latest/
                    cfgparser.get('general', 'work_dir') == '.':
                     cfgparser.set('general', 'work_dir',
                                   os.path.abspath(os.path.dirname(fpath)))
-            except Error, err:
+            except Error as err:
                 raise errors.ConfigError('config file error:%s' % err)
             self._cfgparsers.append(cfgparser)
         self._cfgparsers.append(self._create_default_parser())
@@ -339,7 +339,7 @@ url = http://download.tizen.org/releases/daily/trunk/ivi/latest/
 
         with open(fpath, 'w') as wfile:
             wfile.write(self.DEFAULT_CONF_TEMPLATE)
-        os.chmod(fpath, 0600)
+        os.chmod(fpath, 0o600)
 
         log.warning('Created a new config file %s. Please check and edit '
                     'your authentication information.' % fpath)
@@ -380,7 +380,7 @@ url = http://download.tizen.org/releases/daily/trunk/ivi/latest/
         for cfgparser in self._cfgparsers:
             try:
                 return cfgparser.get(section, opt)
-            except Error, err:
+            except Error as err:
                 pass
         raise errors.ConfigError(err)
 
@@ -392,7 +392,7 @@ url = http://download.tizen.org/releases/daily/trunk/ivi/latest/
             try:
                 options.update(cfgparser.options(section))
                 sect_found = True
-            except Error, err:
+            except Error as err:
                 pass
 
         if not sect_found:
@@ -431,7 +431,7 @@ url = http://download.tizen.org/releases/daily/trunk/ivi/latest/
                  val = self._get('passwdx', section)
                  try:
                      ret = decode_passwdx(val)
-                 except (TypeError, IOError), err:
+                 except (TypeError, IOError) as err:
                      raise errors.ConfigError('passwdx:%s' % err)
         else:
             ret = self._get(opt, section)
@@ -460,7 +460,7 @@ url = http://download.tizen.org/releases/daily/trunk/ivi/latest/
         for cfgparser in cfgparsers:
             try:
                 cfgparser.update()
-            except IOError, err:
+            except IOError as err:
                 log.warning('update config file error: %s' % err)
 
 
@@ -480,7 +480,7 @@ class SectionConf(object):
         password = url.password or parent.common_password
         try:
             self.url = SafeURL(url.url, user, password)
-        except ValueError, err:
+        except ValueError as err:
             raise errors.ConfigError('%s for %s' % (str(err), url.url))
 
     def dump(self, fhandler):
@@ -596,7 +596,7 @@ class BizConfigManager(ConfigMgr):
         value = re.sub(r'\$\{([^}]+)\}', r'%(\1)s', value)
         try:
             value = value % general_keys
-        except KeyError, err:
+        except KeyError as err:
             raise errors.ConfigError('unknown key: %s. Supportted '\
                     'keys are %s' % (str(err), ' '.join( \
                     self.DEFAULTS['general'].keys())))
@@ -636,7 +636,7 @@ class BizConfigManager(ConfigMgr):
                 dump_general(fhandler)
                 profile.dump(fhandler)
             shutil.move(tmp.path, os.path.expanduser(fname))
-        except IOError, err:
+        except IOError as err:
             raise errors.ConfigError(err)
 
         log.warning('subcommand oriented style of config is deprecated. '
@@ -760,7 +760,7 @@ class BizConfigManager(ConfigMgr):
                 if name == 'passwdx':
                     try:
                         value = decode_passwdx(value)
-                    except (TypeError, IOError), err:
+                    except (TypeError, IOError) as err:
                         raise errors.ConfigError('Error decoding %s: %s' % \
                                                  (opt, err))
                     repos[key]['passwd'] = value

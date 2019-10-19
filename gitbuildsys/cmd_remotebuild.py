@@ -76,7 +76,7 @@ def main(args):
 
     try:
         repo = RpmGitRepository(args.gitdir)
-    except GitRepositoryError, err:
+    except GitRepositoryError as err:
         raise GbsError(str(err))
 
     workdir = repo.path
@@ -114,7 +114,7 @@ def main(args):
     # get 'name' and 'version' from spec file
     try:
         spec = gbp.rpm.SpecFile(spec_to_parse)
-    except GbpError, err:
+    except GbpError as err:
         raise GbsError('%s' % err)
 
     if not spec.name:
@@ -175,7 +175,7 @@ def main(args):
                                                   status[obs_repo][obs_arch]))
             log.info('build log for %s/%s/%s/%s' % (target_prj, package,
                                                     obs_repo, obs_arch))
-            print api.get_buildlog(target_prj, package, obs_repo, obs_arch)
+            print(api.get_buildlog(target_prj, package, obs_repo, obs_arch))
 
             return 0
 
@@ -195,7 +195,7 @@ def main(args):
                 log.info('no build results from build server')
             return 0
 
-    except OSCError, err:
+    except OSCError as err:
         raise GbsError(str(err))
 
     with utils.Workdir(workdir):
@@ -203,7 +203,7 @@ def main(args):
 
     try:
         commit_msg = repo.get_commit_info(args.commit or 'HEAD')['subject']
-    except GitRepositoryError, exc:
+    except GitRepositoryError as exc:
         raise GbsError('failed to get commit info: %s' % exc)
 
     files = glob.glob("%s/*" % exportdir)
@@ -226,7 +226,7 @@ def main(args):
             api.create_package(target_prj, package)
             # new project - submitting all local files
             commit_files = files
-    except OSCError, err:
+    except OSCError as err:
         raise GbsError(str(err))
 
     if not commit_files:

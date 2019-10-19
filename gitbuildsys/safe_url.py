@@ -63,9 +63,9 @@ class SafeURL(str):
         'return True is it is local path'
         return self.startswith('/')
 
-    def pathjoin(self, *args):
+    def pathjoin(self, args):
         '''treat self as path and urljoin'''
-        new = urlparse.urljoin(self.rstrip('/') + '/', *args)
+        new = urlparse.urljoin(self.rstrip('/') + '/', args)
         return SafeURL(new, self.user, self.passwd)
 
     def _get_userinfo(self):

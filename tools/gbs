@@ -713,10 +713,10 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         log.LOGGER.error('^C caught, program aborted.')
 
-    except errors.Usage, usage:
+    except errors.Usage as usage:
         log.LOGGER.error(str(usage))
 
-    except errors.CmdError, err:
+    except errors.CmdError as err:
         if log.LOGGER.level == log.DEBUG:
             import traceback
             log.LOGGER.error(traceback.format_exc())

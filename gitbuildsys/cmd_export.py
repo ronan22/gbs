@@ -245,7 +245,7 @@ def export_sources(repo, commit, export_dir, spec, args, create_tarball=True):
                 log.error(errmsg)
         if ret:
             raise GbsError("Failed to export packaging files from git tree")
-    except GitRepositoryError, excobj:
+    except GitRepositoryError as excobj:
         raise GbsError("Repository error: %s" % excobj)
 
 
@@ -258,7 +258,7 @@ def main(args):
     workdir = args.gitdir
     try:
         repo = RpmGitRepository(workdir)
-    except GitRepositoryError, err:
+    except GitRepositoryError as err:
         raise GbsError(str(err))
     log.debug("read repo path")
     utils.read_localconf(repo.path)
@@ -324,7 +324,7 @@ def main(args):
     specfile = os.path.basename(main_spec)
     try:
         spec = rpm.SpecFile(os.path.join(export_dir, specfile))
-    except GbpError, err:
+    except GbpError as err:
         raise GbsError('%s' % err)
 
     if not spec.name or not spec.version:

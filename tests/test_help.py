@@ -36,9 +36,9 @@ class TestHelp(unittest.TestCase):
                     "chroot", "chr"]:
 
             try:
-                print '>>>sub', sub
+                print('>>>sub', sub)
                 GBS(argv=["gbs", sub, "--help"])
-            except SystemExit, err:
+            except SystemExit as err:
                 eq_(err.code, 0)
 
     @staticmethod
@@ -46,5 +46,5 @@ class TestHelp(unittest.TestCase):
         """Test running gbs --help and gbs help."""
         try:
             GBS(argv=["gbs", "--help"])
-        except SystemExit, err:
+        except SystemExit as err:
             eq_(err.code, 0)

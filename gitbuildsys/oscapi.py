@@ -53,7 +53,7 @@ class OSC(object):
         if oscrc:
             try:
                 conf.get_config(override_conffile=oscrc)
-            except OSError, err:
+            except OSError as err:
                 if err.errno == 1:
                     # permission problem, should be the chmod(0600) issue
                     raise ObsError('Current user has no write permission '\
@@ -80,7 +80,7 @@ class OSC(object):
             try:
                 return method(url, data=data, file=filep)
             except (urllib2.URLError, M2Crypto.m2urllib2.URLError,
-                    M2Crypto.SSL.SSLError, ssl.SSLError), err:
+                    M2Crypto.SSL.SSLError, ssl.SSLError) as err:
                 if count == 3:
                     raise OSCError(str(err))
 
@@ -127,7 +127,7 @@ class OSC(object):
 
         # Create target meta
         meta = '<project name="%s"><title></title>'\
-	       '<description>%s</description>'\
+               '<description>%s</description>'\
                '<person role="maintainer" userid="%s"/>' % \
                (target, description, conf.get_apiurl_usr(self.apiurl))
         if linkto:
@@ -143,7 +143,7 @@ class OSC(object):
             for name in repos:
                 if linkedbuild:
                     meta += '<repository name="%s" linkedbuild="%s">' % \
-                                (name, linkedbuild)
+                        (name, linkedbuild)
                 else:
                     meta += '<repository name="%s">' % name
                 meta += '<path project="%s" repository="%s" />' % (src, name)
@@ -162,7 +162,7 @@ class OSC(object):
             # Create project and set its meta
             core.edit_meta('prj', path_args=quote_plus(target), data=meta)
         except (urllib2.URLError, M2Crypto.m2urllib2.URLError,
-                M2Crypto.SSL.SSLError), err:
+                M2Crypto.SSL.SSLError) as err:
             raise ObsError("Can't set meta for %s: %s" % (target, str(err)))
 
         # don't need set project config if no src project
@@ -173,7 +173,7 @@ class OSC(object):
         try:
             config = core.show_project_conf(self.apiurl, src)
         except (urllib2.URLError, M2Crypto.m2urllib2.URLError,
-                M2Crypto.SSL.SSLError), err:
+                M2Crypto.SSL.SSLError) as err:
             raise ObsError("Can't get config from project %s: %s" \
                            % (src, str(err)))
 
@@ -181,7 +181,7 @@ class OSC(object):
                                  self.apiurl, False)
         try:
             self.core_http(core.http_PUT, url, data=''.join(config))
-        except OSCError, err:
+        except OSCError as err:
             raise ObsError("can't copy config from %s to %s: %s" \
                            % (src, target, err))
 
@@ -195,7 +195,7 @@ class OSC(object):
         url = core.makeurl(self.apiurl, ['source', prj], query)
         try:
             self.core_http(core.http_DELETE, url)
-        except OSCError, err:
+        except OSCError as err:
             raise ObsError("can't delete project %s: %s" % (prj, err))
 
     def exists(self, prj, pkg=''):
@@ -205,11 +205,11 @@ class OSC(object):
         try:
             core.meta_exists(metatype=metatype, path_args=path_args,
                              create_new=False, apiurl=self.apiurl)
-        except urllib2.HTTPError, err:
+        except urllib2.HTTPError as err:
             if err.code == 404:
                 return False
         except (urllib2.URLError, M2Crypto.m2urllib2.URLError, \
-                                  M2Crypto.SSL.SSLError), err:
+                M2Crypto.SSL.SSLError) as err:
             pass
         except SSLVerificationError:
             raise ObsError("SSL verification error.")
@@ -223,7 +223,7 @@ class OSC(object):
         try:
             return core.rebuild(self.apiurl, prj, pkg, repo=None, arch=arch)
         except (urllib2.URLError, M2Crypto.m2urllib2.URLError, \
-                M2Crypto.SSL.SSLError), err:
+                M2Crypto.SSL.SSLError) as err:
             raise ObsError("Can't trigger rebuild for %s/%s: %s" % \
                            (prj, pkg, str(err)))
         except SSLVerificationError:
@@ -275,8 +275,8 @@ class OSC(object):
     def commit_files(self, prj, pkg, files, message):
         """Commits files to OBS."""
 
-        query = {'cmd'    : 'commitfilelist',
-                 'user'   : conf.get_apiurl_usr(self.apiurl),
+        query = {'cmd': 'commitfilelist',
+                 'user': conf.get_apiurl_usr(self.apiurl),
                  'comment': message,
                  'keeplink': 1}
         url = core.makeurl(self.apiurl, ['source', prj, pkg], query=query)
@@ -298,7 +298,7 @@ class OSC(object):
                         query="rev=repository")
                     self.core_http(core.http_PUT, put_url, filep=fpath)
             self.core_http(core.http_POST, url, data=xml)
-        except OSCError, err:
+        except OSCError as err:
             raise ObsError("can't commit files to %s/%s: %s" % (prj, pkg, err))
 
     def create_package(self, prj, pkg):
@@ -310,7 +310,7 @@ class OSC(object):
                                  self.apiurl, False)
         try:
             self.core_http(core.http_PUT, url, data=meta)
-        except OSCError, err:
+        except OSCError as err:
             raise ObsError("can't create %s/%s: %s" % (prj, pkg, err))
 
     def get_results(self, prj, pkg):
@@ -319,7 +319,7 @@ class OSC(object):
         try:
             build_status = core.get_results(self.apiurl, prj, pkg)
         except (urllib2.URLError, M2Crypto.m2urllib2.URLError,
-                M2Crypto.SSL.SSLError), err:
+                M2Crypto.SSL.SSLError) as err:
             raise ObsError("can't get %s/%s build results: %s" \
                            % (prj, pkg, str(err)))
 
@@ -344,11 +344,11 @@ class OSC(object):
                                          '_log?nostream=1&start=0'])
         try:
             log = self.core_http(core.http_GET, url).read()
-        except OSCError, err:
+        except OSCError as err:
             raise ObsError("can't get %s/%s build log: %s" % (prj, pkg, err))
 
         return log.translate(None, "".join([chr(i) for i in \
-                                                    range(10) + range(11, 32)]))
+                                            range(10) + range(11, 32)]))
 
     @staticmethod
     def get_path(prj, pkg=None):

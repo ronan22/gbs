@@ -116,7 +116,7 @@ def get_binary_name_from_git(args, package_dirs):
 
             try:
                 spec = rpm.SpecFile(spec_to_parse)
-            except GbpError, err:
+            except GbpError as err:
                 raise GbsError('%s' % err)
             binary_list.append(spec.name)
 
@@ -148,7 +148,7 @@ def prepare_repos_and_build_conf(args, arch, profile):
                         log.warning('local repo: %s does not exist' % repo)
                         continue
                 opt_repo = SafeURL(repo)
-            except ValueError, err:
+            except ValueError as err:
                 log.warning('Invalid repo %s: %s' % (repo, str(err)))
             else:
                 repos.append(opt_repo)
@@ -185,7 +185,7 @@ def prepare_repos_and_build_conf(args, arch, profile):
                        % distconf)
     try:
         shutil.copy(buildconf, distconf)
-    except IOError, err:
+    except IOError as err:
         raise GbsError("Failed to copy build conf: %s" % (str(err)))
 
     if not os.path.exists(distconf):
@@ -561,7 +561,7 @@ def prepare_depsbuild_source(gnmapper, profile, arch, pkgs, url, download_path):
                 continue
 
             deps_path.append(gnmapper.get_gerritname_by_obsname(pkg))
-    except OSCError, err:
+    except OSCError as err:
         raise GbsError(str(err))
 
     sync_source(None, deps_path, url, download_path)
@@ -636,7 +636,7 @@ def main(args):
             shutil.copy(buildconf, distconf)
             log.info('build conf has been downloaded at:\n      %s' \
                        % distconf)
-        except IOError, err:
+        except IOError as err:
             raise GbsError("Failed to copy build conf: %s" % (str(err)))
 
         profile.buildconf = distconf
@@ -663,7 +663,7 @@ def main(args):
                     local_pkgs.append(pkg)
                 else:
                    log.error('package %s parse failed' %spec.name)
-            except GbpError, err:
+            except GbpError as err:
                 log.warning('gbp parse spec failed. %s' % err)
 
         if args.full_build:

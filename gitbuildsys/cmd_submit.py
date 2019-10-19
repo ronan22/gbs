@@ -93,7 +93,7 @@ def main(args):
         repo = RpmGitRepository(workdir)
         commit = repo.rev_parse(args.commit)
         current_branch = repo.get_branch()
-    except GitRepositoryError, err:
+    except GitRepositoryError as err:
         raise GbsError(str(err))
 
     try:
@@ -137,13 +137,13 @@ def main(args):
     try:
         repo.create_tag(tagname, msg=message, commit=commit, sign=args.sign,
                         keyid=args.user_key)
-    except GitRepositoryError, err:
+    except GitRepositoryError as err:
         raise GbsError('failed to create tag %s: %s ' % (tagname, str(err)))
 
     log.info("pushing tag to remote '%s'" % args.remote)
     try:
         repo.push_tag(args.remote, tagname)
-    except GitRepositoryError, err:
+    except GitRepositoryError as err:
         repo.delete_tag(tagname)
         raise GbsError('failed to push tag %s :%s' % (tagname, str(err)))
 

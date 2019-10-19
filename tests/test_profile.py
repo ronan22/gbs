@@ -25,6 +25,8 @@ from gitbuildsys.errors import ConfigError
 from test_config import Fixture
 from test_passwdx import FakeFile
 
+#after python3.0, reload has been moved to imp std lib.
+from imp import reload
 
 def get_profile():
     '''get current profile to test'''

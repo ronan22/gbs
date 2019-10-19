@@ -25,7 +25,8 @@ from mock import patch
 
 from gitbuildsys.errors import ConfigError
 import gitbuildsys.conf
-
+#after python3.0, reload has been moved to imp std lib.
+from imp import reload
 
 FILE_DIRNAME = os.path.dirname(os.path.abspath(__file__))
 

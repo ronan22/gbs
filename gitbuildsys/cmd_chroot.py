@@ -49,7 +49,7 @@ def main(args):
         build_env = os.environ
         build_env['PS1'] = "(tizen-build-env)@\h \W]\$ "
         subprocess.call(cmd, env=build_env)
-    except OSError, err:
+    except OSError as err:
         raise GbsError('failed to chroot to %s: %s' % (build_root, err))
     except KeyboardInterrupt:
         log.info('keyboard interrupt ...')

@@ -142,9 +142,10 @@ class Temp(object):
                 (fds, path) = tempfile.mkstemp(suffix, prefix, dirn)
                 os.close(fds)
                 if content:
-                    with file(path, 'w+') as fobj:
+                    #python3 will not support file, use open
+                    with open(path, 'w+') as fobj:
                         fobj.write(content)
-        except OSError, err:
+        except OSError as err:
             raise GbsError("Failed to create dir or file on %s: %s" % \
                           (target_dir, str(err)))
         self.path = path
@@ -239,7 +240,7 @@ class URLGrabber(object):
         original_handler = signal.signal(signal.SIGINT, handler)
         try:
             curl.perform()
-        except pycurl.error, err:
+        except pycurl.error as err:
             log.debug('fetching error:%s' % str(err))
 
             errcode, errmsg = err.args
@@ -707,7 +708,7 @@ def git_status_checker(git, opts):
             git.rev_parse(opts.commit)
         is_clean = git.is_clean()[0]
         status = git.status()
-    except (GbpError, GitRepositoryError), err:
+    except (GbpError, GitRepositoryError) as err:
         raise GbsError(str(err))
 
     untracked_files = status['??']
@@ -752,7 +753,7 @@ def show_file_from_rev(git_path, relative_path, commit_id):
         with Workdir(git_path):
             return  subprocess.Popen(args,
                                      stdout=subprocess.PIPE).communicate()[0]
-    except (subprocess.CalledProcessError, OSError), err:
+    except (subprocess.CalledProcessError, OSError) as err:
         log.debug('failed to checkout %s from %s:%s' % (relative_path,
                                                         commit_id, str(err)))
     return None
@@ -770,7 +771,7 @@ def file_exists_in_rev(git_path, relative_path, commit_id, dir_only=False):
         with Workdir(git_path):
             output = subprocess.Popen(args,
                                       stdout=subprocess.PIPE).communicate()[0]
-    except (subprocess.CalledProcessError, OSError), err:
+    except (subprocess.CalledProcessError, OSError) as err:
         raise GbsError('failed to check existence of %s in %s:%s' % (
             relative_path, commit_id, str(err)))
 
@@ -787,7 +788,7 @@ def glob_in_rev(git_path, pattern, commit_id):
         with Workdir(git_path):
             output = subprocess.Popen(args,
                                       stdout=subprocess.PIPE).communicate()[0]
-    except (subprocess.CalledProcessError, OSError), err:
+    except (subprocess.CalledProcessError, OSError) as err:
         raise GbsError('failed to glob %s in %s:%s' % (
             pattern, commit_id, str(err)))
 
@@ -829,6 +830,6 @@ def edit_file(target_fname, initial_content=None):
     try:
         with open(target_fname, 'w') as fobj:
             fobj.write(changes)
-    except IOError, err:
+    except IOError as err:
         raise GbsError("Can't update %s: %s" % (target_fname, str(err)))
     return True
