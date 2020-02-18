@@ -1,3 +1,9 @@
+gbs (0.25.10) unstable; urgency=high
+  * upgrade to gbs v0.25.10, which contains the following features:
+    * Bug fix:
+      - Fix pylint issue for gbs
+ -- Meng Yan <yan11.meng@samsung.com>  Mon, 17 Feb 2020 12:30:00 +0800
+
 gbs (0.25.9) unstable; urgency=high
   * upgrade to gbs v0.25.9, which contains the following features:
       - Add --export-only feature

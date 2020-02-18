@@ -1,3 +1,8 @@
+* Mon Feb 17 2020 Meng Yan <yan11.meng@samsung.com> 0.25.10
+  * upgrade to gbs v0.25.10, which contains the following features:
+    * bug fix
+      - Fix pylint issue for gbs
+
 * Fri Aug 30 2019 Wang Biao <biao716.wang@samsung.com> 0.25.9
   * upgrade to gbs v0.25.9, which contains the following features:
     * New
