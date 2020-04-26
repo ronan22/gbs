@@ -68,8 +68,7 @@ def guess_spec(git_path, packaging_dir, given_spec, commit_id='WC.UNTRACKED'):
             packaging_dir = os.readlink(packaging_dir)
         check = lambda fname, dir_only=False: os.path.exists(os.path.join(
             git_path, fname))
-        glob_ = lambda pattern: [name.replace(git_path+'/', '') \
-            for name in reversed(glob.glob(os.path.join(git_path, pattern)))]
+        glob_ = lambda pattern: glob_in_inc(git_path, packaging_dir, pattern)
         msg = 'No such spec file %s'
     else:
         git_object = commit_id + ':' + packaging_dir
@@ -96,7 +95,10 @@ def guess_spec(git_path, packaging_dir, given_spec, commit_id='WC.UNTRACKED'):
         if not check(spec):
             raise GbsError(msg % spec)
 
-    specs = glob_(os.path.join(packaging_dir, '*.spec'))
+    if commit_id == 'WC.UNTRACKED':
+        specs=glob_('*.spec')
+    else:
+        specs = glob_(os.path.join(packaging_dir, '*.spec'))
     if not specs:
         raise GbsError("can't find any spec file under packaging dir: "
                        "%s" % packaging_dir)
@@ -776,6 +778,16 @@ def file_exists_in_rev(git_path, relative_path, commit_id, dir_only=False):
             relative_path, commit_id, str(err)))
 
     return output != ''
+
+
+def glob_in_inc(git_path, packaging_dir, pattern):
+    f_path=os.path.join(git_path,packaging_dir)
+    specs = []
+    if(os.path.isdir(f_path)):
+        for filename in os.listdir(f_path):
+            if fnmatch.fnmatch(filename,pattern):
+                 specs.append(os.path.join(packaging_dir,filename))
+    return specs
 
 
 def glob_in_rev(git_path, pattern, commit_id):
