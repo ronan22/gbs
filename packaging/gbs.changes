@@ -1,3 +1,10 @@
+* Thu May 7 2020 Meng Yan <yan11.meng@samsung.com> 0.25.11
+  * upgrade to gbs v0.25.11, which contains the following features:
+    * bug fix
+      - Remove --replacefile option in build-pkg-rpm
+      - Fix errors about check_circle in depanneur
+      - Fix gbs build error about path with'[]'
+
 * Mon Feb 17 2020 Meng Yan <yan11.meng@samsung.com> 0.25.10
   * upgrade to gbs v0.25.10, which contains the following features:
     * bug fix

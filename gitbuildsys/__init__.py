@@ -20,4 +20,4 @@
 module for gbs tool
 """
 
-__version__ = "0.25.10"
+__version__ = "0.25.11"

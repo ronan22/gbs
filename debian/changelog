@@ -1,3 +1,11 @@
+gbs (0.25.11) unstable; urgency=high
+  * upgrade to gbs v0.25.11, which contains the following features:
+    * Bug fix:
+      - Remove --replacefile option in build-pkg-rpm
+      - Fix errors about check_circle in depanneur
+      - Fix gbs build error about path with'[]'
+ -- Meng Yan <yan11.meng@samsung.com>  Thu, 7 May 2020 12:30:00 +0800
+
 gbs (0.25.10) unstable; urgency=high
   * upgrade to gbs v0.25.10, which contains the following features:
     * Bug fix:

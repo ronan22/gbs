@@ -1,3 +1,13 @@
+Release notes for gbs 0.25.11
+==========================
+
+- Release Date: 2020-5
+
+- Bug fix:
+    * Remove --replacefile option in build-pkg-rpm
+    * Fix errors about check_circle in depanneur
+    * Fix build error with '[]' in path
+
 Release notes for gbs 0.25.10
 ==========================
 
