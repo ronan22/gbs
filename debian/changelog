@@ -1,3 +1,11 @@
+gbs (0.25.12) unstable; urgency=high
+  * upgrade to gbs v0.25.12, which contains the following bug fixing & features:
+    * update dependencies:
+      - depanneur >= 0.16.7
+      - tizen-qemu-arm-static >= 2020.06.17
+      - git-buildpackage-rpm >= 0.9.20-tizen20200522
+ -- Meng Yan <yan11.meng@samsung.com>  Thu, 18 Jun 2020 12:30:00 +0800
+
 gbs (0.25.11) unstable; urgency=high
   * upgrade to gbs v0.25.11, which contains the following features:
     * Bug fix:

@@ -1,3 +1,10 @@
+* Thu Jun 18 2020 Meng Yan <yan11.meng@samsung.com> 0.25.12
+  * upgrade to gbs v0.25.12, which contains the following features:
+    * update dependencies:
+      - depanneur >= 0.16.7
+      - tizen-qemu-arm-static >= 2020.06.17
+      - git-buildpackage-rpm >= 0.9.20-tizen20200522
+
 * Thu May 7 2020 Meng Yan <yan11.meng@samsung.com> 0.25.11
   * upgrade to gbs v0.25.11, which contains the following features:
     * bug fix

@@ -1,3 +1,13 @@
+Release notes for gbs 0.25.12
+==========================
+
+- Release Date: 2020-6
+
+- Update dependencies:
+    * depanneur >= 0.16.7
+    * tizen-qemu-arm-static >= 2020.06.17
+    * git-buildpackage-rpm >= 0.9.20-tizen20200522
+
 Release notes for gbs 0.25.11
 ==========================
 
