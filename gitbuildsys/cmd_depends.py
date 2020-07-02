@@ -19,28 +19,21 @@
 
 """Implementation of subcmd: depends
 """
-
 import os
 import shutil
 import pwd
 import re
 import urlparse
 import glob
-import gzip
 import requests
-from lxml import etree
-import xml.etree.cElementTree as ET
-import xml.etree.ElementTree as ETP
 import subprocess
 import re
 
-from gitbuildsys.utils import Temp, Workdir, RepoParser, read_localconf, \
-                              guess_spec, show_file_from_rev, \
-                              GitRefMappingParser, GitDirFinder, GerritNameMapper
+from gitbuildsys.utils import Temp, RepoParser, read_localconf
 from gitbuildsys.errors import GbsError, Usage
-from gitbuildsys.conf import configmgr, MappingConfigParser, encode_passwd
+from gitbuildsys.conf import configmgr
 from gitbuildsys.safe_url import SafeURL
-from gitbuildsys.cmd_export import get_packaging_dir, config_is_true
+from gitbuildsys.cmd_export import get_packaging_dir
 from gitbuildsys.log import LOGGER as log
 from gitbuildsys.oscapi import OSC, OSCError
 from gitbuildsys.log import DEBUG
@@ -50,43 +43,23 @@ from gbp import rpm
 from gbp.rpm import SpecFile
 from gbp.errors import GbpError
 
+from gitbuildsys.cmd_build import CHANGE_PERSONALITY, SUPPORTEDARCHS, formalize_build_conf, get_profile, get_local_archs
 
-CHANGE_PERSONALITY = {
-    'ia32':  'linux32',
-    'i686':  'linux32',
-    'i586':  'linux32',
-    'i386':  'linux32',
-    'ppc':   'powerpc32',
-    's390':  's390',
-    'sparc': 'linux32',
-    'sparcv8': 'linux32',
-    }
-
-SUPPORTEDARCHS = [
-    'x86_64',
-    'i586',
-    'armv6l',
-    'armv7hl',
-    'armv7l',
-    'aarch64',
-    'mips',
-    'mipsel',
-    ]
 
 USERID = pwd.getpwuid(os.getuid())[0]
 TMPDIR = None
 
-def formalize_build_conf(profile):
-    ''' formalize build conf file name from profile'''
+def prepare_depanneur_opts(args):
+    '''generate extra options for depanneur'''
 
-    # build conf file name should not start with digital, see:
-    # obs-build/Build.pm:read_config_dist()
-    start_digital_re = re.compile(r'^[0-9]')
-    if start_digital_re.match(profile):
-        profile = 'tizen%s' % profile
+    cmd_opts = []
+    if args.debug:
+        cmd_opts += ['--debug']
 
-    # '-' is not allowed, so replace with '_'
-    return profile.replace('-', '_')
+    cmd_opts += ['--packaging-dir=%s' % get_packaging_dir(args)]
+    cmd_opts += ['--depends']
+
+    return cmd_opts
 
 def prepare_repos_and_build_conf(args, arch, profile):
     '''generate repos and build conf options for depanneur'''
@@ -161,76 +134,12 @@ def prepare_repos_and_build_conf(args, arch, profile):
     if not distconf.endswith('.conf') or '-' in os.path.basename(distconf):
         raise GbsError("build config file must end with .conf, and can't "
                        "contain '-'")
-    dist = os.path.basename(distconf)[:-len('.conf')]
+    dist = "'"+os.path.basename(distconf)[:-len('.conf')]+"'"
     cmd_opts += ['--dist=%s' % dist]
-    cmd_opts += ['--configdir=%s' % os.path.dirname(distconf)]
+    path = "'"+os.path.dirname(distconf)+"'"
+    cmd_opts += ['--configdir=%s' % path]
 
     return cmd_opts
-
-def prepare_depanneur_opts(args):
-    '''generate extra options for depanneur'''
-
-    cmd_opts = []
-    if args.debug:
-        cmd_opts += ['--debug']
-
-    cmd_opts += ['--packaging-dir=%s' % get_packaging_dir(args)]
-    cmd_opts += ['--depends']
-
-    return cmd_opts
-
-def get_profile(args):
-    """
-    Get the build profile to be used
-    """
-    if args.profile:
-        profile_name = args.profile if args.profile.startswith("profile.") \
-                                    else "profile." + args.profile
-        profile = configmgr.build_profile_by_name(profile_name)
-    else:
-        profile = configmgr.get_current_profile()
-    return profile
-
-def get_local_archs(repos):
-    """
-    Get the supported arch from prebuilt toolchains
-      > get primary file
-      > get archs
-
-    Each toolchain should contain about 128 packages,
-    it is insufficient if less than that.
-    """
-    def get_primary_file_from_local(repos):
-        def find_primary(repo):
-            pattern = os.path.join(repo, 'repodata', '*primary.*.gz')
-            files = glob.glob(pattern)
-            if files:
-                return files[0]
-
-        for repo in repos:
-            if not repo.startswith('http'):
-                pri = find_primary(repo)
-                if pri:
-                    yield pri
-
-    def extract_arch(primary):
-        with gzip.open(primary) as fobj:
-            root = ET.fromstring(fobj.read())
-
-        xmlns = re.sub(r'metadata$', '', root.tag)
-        for elm in root.getiterator('%spackage' % xmlns):
-            arch = elm.find('%sarch' % xmlns).text
-            if re.match(r'i[3-6]86', arch):
-                yield 'i586'
-            elif arch not in ('noarch', 'src'):
-                yield arch
-
-    archs = set()
-    for pri in get_primary_file_from_local(repos):
-        for arch in extract_arch(pri):
-            archs.add(arch)
-
-    return archs
 
 def main(args):
     """gbs depends entry point."""

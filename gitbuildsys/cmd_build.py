@@ -205,9 +205,10 @@ def prepare_repos_and_build_conf(args, arch, profile):
 
     return cmd_opts
 
-def prepare_depanneur_opts(args):
-    '''generate extra options for depanneur'''
+#refine code with SAM check.
 
+def prepare_depanneur_simple_opts(args):
+    '''generate extra simple options for depanneur'''
     cmd_opts = []
     if args.exclude:
         cmd_opts += ['--exclude=%s' % i for i in args.exclude.split(',')]
@@ -245,6 +246,13 @@ def prepare_depanneur_opts(args):
         cmd_opts += ['--style=%s' % args.style]
     if args.export_only:
         cmd_opts += ['--export-only']
+
+    return cmd_opts
+
+def prepare_depanneur_opts(args):
+    '''generate extra options for depanneur'''
+
+    cmd_opts = prepare_depanneur_simple_opts(args)
     #
     if args.package_list:
         package_list = args.package_list.split(',')
@@ -350,11 +358,11 @@ def get_local_archs(repos):
 
     return archs
 
-def create_autoconf(arch, snapshot, full_build):
+def get_profile_url(snapshot):
     """
-    Create ~/.gbs.conf.auto for user
+    get profile url according to snapshot.
     """
-    url = ''
+    profile_url = ''
     if snapshot:
         if snapshot.startswith('tizen-3.0-mobile'):
             profile_url = 'http://download.tizen.org/snapshots/tizen/3.0-mobile/' + snapshot
@@ -372,6 +380,17 @@ def create_autoconf(arch, snapshot, full_build):
         res = requests.get(profile_url)
         if res.status_code == 404:
             raise GbsError('specified snapshot: %s does not exist, please check' %profile_url)
+
+
+    return profile_url
+
+def create_autoconf(arch, snapshot, full_build):
+    """
+    Create ~/.gbs.conf.auto for user
+    """
+    url = ''
+
+    profile_url = get_profile_url(snapshot)
 
     log.info("sync git-ref-mapping from review.tizen.org to get reference binary id")
     refparser = GitRefMappingParser()
@@ -566,9 +585,120 @@ def prepare_depsbuild_source(gnmapper, profile, arch, pkgs, url, download_path):
 
     sync_source(None, deps_path, url, download_path)
 
+
+def get_local_pkgs(args):
+    '''get local pkgs'''
+    exclude_pkgs = []
+    if args.exclude:
+        exclude_pkgs = args.exclude.split(',')
+    gnmapper = GerritNameMapper(r.content, repoparser.primaryxml)
+    for spec_file in gitf.specs:
+        try:
+            spec = SpecFile(spec_file)
+            if spec.name in exclude_pkgs:
+                continue
+
+            if args.full_build:
+                pkg = gnmapper.get_gerritname_by_srcname(spec.name)
+            else:
+                pkg = gnmapper.get_pkgname_by_srcname(spec.name)
+            if pkg != None:
+                local_pkgs.append(pkg)
+            else:
+               log.error('package %s parse failed' %spec.name)
+        except GbpError as err:
+            log.warning('gbp parse spec failed. %s' % err)
+
+    return local_pkgs
+
+def prepare_depanneur_cmd(args, buildarch, profile, workdir):
+    '''Prepare depanneur commond'''
+    # get virtual env from system env first
+    if 'VIRTUAL_ENV' in os.environ:
+        cmd = ['%s/usr/bin/depanneur' % os.environ['VIRTUAL_ENV']]
+    else:
+        cmd = ['depanneur']
+
+    cmd += ['--arch=%s' % buildarch]
+
+    if args.clean:
+        cmd += ['--clean']
+
+    # check & prepare repos and build conf
+    if not args.noinit:
+        cmd += prepare_repos_and_build_conf(args, buildarch, profile)
+    else:
+        cmd += ['--noinit']
+
+    cmd += ['--path=%s' % "'"+str(workdir)+"'"]
+
+    if args.ccache:
+        cmd += ['--ccache']
+
+    if args.extra_packs:
+        cmd += ['--extra-packs=%s' % args.extra_packs]
+
+    hostarch = os.uname()[4]
+    if hostarch != buildarch and buildarch in CHANGE_PERSONALITY:
+        cmd = [CHANGE_PERSONALITY[buildarch]] + cmd
+
+    # Extra depanneur special command options
+    cmd += prepare_depanneur_opts(args)
+
+    # Extra options for gbs export
+    if args.include_all:
+        cmd += ['--include-all']
+    if args.commit:
+        cmd += ['--commit=%s' % args.commit]
+
+    if args.upstream_branch:
+        cmd += ['--upstream-branch=%s' % args.upstream_branch]
+    if args.upstream_tag:
+        cmd += ['--upstream-tag=%s' % args.upstream_tag]
+
+    if args.conf and args.conf != '.gbs.conf':
+        fallback = configmgr.get('fallback_to_native')
+    elif args.full_build or args.deps_build:
+        fallback = configmgr.get('fallback_to_native')
+    else:
+        fallback = ''
+    if args.fallback_to_native or config_is_true(fallback):
+        cmd += ['--fallback-to-native']
+
+    if args.squash_patches_until:
+        cmd += ['--squash-patches-until=%s' % args.squash_patches_until]
+    if args.no_patch_export:
+        cmd += ['--no-patch-export']
+
+    if args.define:
+        cmd += [('--define="%s"' % i) for i in args.define]
+    if args.spec:
+        cmd += ['--spec=%s' % args.spec]
+
+    # Determine if we're on devel branch
+    orphan_packaging = configmgr.get('packaging_branch', 'orphan-devel')
+    if orphan_packaging:
+        cmd += ['--spec-commit=%s' % orphan_packaging]
+
+    return cmd
+
+def init_buildroot(args, profile):
+    '''init build root'''
+    if args.buildroot:
+        build_root = args.buildroot
+    elif 'TIZEN_BUILD_ROOT' in os.environ:
+        build_root = os.environ['TIZEN_BUILD_ROOT']
+    elif profile.buildroot:
+        build_root = profile.buildroot
+    else:
+        build_root = configmgr.get('buildroot', 'general')
+    build_root = os.path.expanduser(build_root)
+
+    return build_root
+
 def main(args):
     """gbs build entry point."""
-
+    print (args)
     global TMPDIR
     TMPDIR = os.path.join(configmgr.get('tmpdir', 'general'), '%s-gbs' % USERID)
 
@@ -645,27 +775,8 @@ def main(args):
         if r.status_code == 404:
             raise GbsError('get pkg xml from %s failed' %profile.pkgs.url)
 
-        exclude_pkgs = []
-        if args.exclude:
-            exclude_pkgs = args.exclude.split(',')
+        local_pkgs = get_local_pkgs(args)
         gnmapper = GerritNameMapper(r.content, repoparser.primaryxml)
-        for spec_file in gitf.specs:
-            try:
-                spec = SpecFile(spec_file)
-                if spec.name in exclude_pkgs:
-                    continue
-
-                if args.full_build:
-                    pkg = gnmapper.get_gerritname_by_srcname(spec.name)
-                else:
-                    pkg = gnmapper.get_pkgname_by_srcname(spec.name)
-                if pkg != None:
-                    local_pkgs.append(pkg)
-                else:
-                   log.error('package %s parse failed' %spec.name)
-            except GbpError as err:
-                log.warning('gbp parse spec failed. %s' % err)
-
         if args.full_build:
             prepare_fullbuild_source(profile, local_pkgs, profile.source.url, download_path.path)
         else:
@@ -681,15 +792,7 @@ def main(args):
         curdir = os.getcwd()
         os.chdir(workdir)
 
-    if args.buildroot:
-        build_root = args.buildroot
-    elif 'TIZEN_BUILD_ROOT' in os.environ:
-        build_root = os.environ['TIZEN_BUILD_ROOT']
-    elif profile.buildroot:
-        build_root = profile.buildroot
-    else:
-        build_root = configmgr.get('buildroot', 'general')
-    build_root = os.path.expanduser(build_root)
+    build_root = init_buildroot(args, profile)
     # transform variables from shell to python convention ${xxx} -> %(xxx)s
     build_root = re.sub(r'\$\{([^}]+)\}', r'%(\1)s', build_root)
     sanitized_profile_name = re.sub("[^a-zA-Z0-9:._-]", "_", profile.name)
@@ -704,71 +807,8 @@ def main(args):
             args.exclude = ','.join(profile.exclude_packages)
     os.environ['TIZEN_BUILD_ROOT'] = os.path.abspath(build_root)
 
-    # get virtual env from system env first
-    if 'VIRTUAL_ENV' in os.environ:
-        cmd = ['%s/usr/bin/depanneur' % os.environ['VIRTUAL_ENV']]
-    else:
-        cmd = ['depanneur']
-
-    cmd += ['--arch=%s' % buildarch]
-
-    if args.clean:
-        cmd += ['--clean']
-
-    # check & prepare repos and build conf
-    if not args.noinit:
-        cmd += prepare_repos_and_build_conf(args, buildarch, profile)
-    else:
-        cmd += ['--noinit']
-
-    cmd += ['--path=%s' % "'"+str(workdir)+"'"]
-
-    if args.ccache:
-        cmd += ['--ccache']
-
-    if args.extra_packs:
-        cmd += ['--extra-packs=%s' % args.extra_packs]
-
-    if hostarch != buildarch and buildarch in CHANGE_PERSONALITY:
-        cmd = [CHANGE_PERSONALITY[buildarch]] + cmd
-
-    # Extra depanneur special command options
-    cmd += prepare_depanneur_opts(args)
-
-    # Extra options for gbs export
-    if args.include_all:
-        cmd += ['--include-all']
-    if args.commit:
-        cmd += ['--commit=%s' % args.commit]
-
-    if args.upstream_branch:
-        cmd += ['--upstream-branch=%s' % args.upstream_branch]
-    if args.upstream_tag:
-        cmd += ['--upstream-tag=%s' % args.upstream_tag]
-
-    if args.conf and args.conf != '.gbs.conf':
-        fallback = configmgr.get('fallback_to_native')
-    elif args.full_build or args.deps_build:
-        fallback = configmgr.get('fallback_to_native')
-    else:
-        fallback = ''
-    if args.fallback_to_native or config_is_true(fallback):
-        cmd += ['--fallback-to-native']
-
-    if args.squash_patches_until:
-        cmd += ['--squash-patches-until=%s' % args.squash_patches_until]
-    if args.no_patch_export:
-        cmd += ['--no-patch-export']
-
-    if args.define:
-        cmd += [('--define="%s"' % i) for i in args.define]
-    if args.spec:
-        cmd += ['--spec=%s' % args.spec]
-
-    # Determine if we're on devel branch
-    orphan_packaging = configmgr.get('packaging_branch', 'orphan-devel')
-    if orphan_packaging:
-        cmd += ['--spec-commit=%s' % orphan_packaging]
+    #prepare depanneur commond
+    cmd = prepare_depanneur_cmd(args, buildarch, profile, workdir)
 
     log.debug("running command: %s" % ' '.join(cmd))
     retcode = os.system(' '.join(cmd))
