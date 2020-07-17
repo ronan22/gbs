@@ -698,7 +698,6 @@ def init_buildroot(args, profile):
 
 def main(args):
     """gbs build entry point."""
-    print (args)
     global TMPDIR
     TMPDIR = os.path.join(configmgr.get('tmpdir', 'general'), '%s-gbs' % USERID)
 
