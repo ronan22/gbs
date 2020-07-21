@@ -585,32 +585,6 @@ def prepare_depsbuild_source(gnmapper, profile, arch, pkgs, url, download_path):
 
     sync_source(None, deps_path, url, download_path)
 
-
-def get_local_pkgs(r, args):
-    '''get local pkgs'''
-    exclude_pkgs = []
-    if args.exclude:
-        exclude_pkgs = args.exclude.split(',')
-    gnmapper = GerritNameMapper(r.content, repoparser.primaryxml)
-    for spec_file in gitf.specs:
-        try:
-            spec = SpecFile(spec_file)
-            if spec.name in exclude_pkgs:
-                continue
-
-            if args.full_build:
-                pkg = gnmapper.get_gerritname_by_srcname(spec.name)
-            else:
-                pkg = gnmapper.get_pkgname_by_srcname(spec.name)
-            if pkg != None:
-                local_pkgs.append(pkg)
-            else:
-               log.error('package %s parse failed' %spec.name)
-        except GbpError as err:
-            log.warning('gbp parse spec failed. %s' % err)
-
-    return local_pkgs
-
 def prepare_depanneur_cmd(args, buildarch, profile, workdir):
     '''Prepare depanneur commond'''
     # get virtual env from system env first
