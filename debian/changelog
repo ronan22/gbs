@@ -1,3 +1,12 @@
+gbs (0.25.13) unstable; urgency=high
+  * upgrade to gbs v0.25.13, which contains the following features:
+    * Bug fix:
+      - Fix reorder error when gbs quickbuild.
+     * New feature and enhancements added:
+      - Refine code with SAM tools check.
+
+ -- Biao Wang <biao716.wang@samsung.com>  Tue, 21 Jul 2020 12:30:00 +0800
+
 gbs (0.25.12) unstable; urgency=high
   * upgrade to gbs v0.25.12, which contains the following bug fixing & features:
     * update dependencies:
