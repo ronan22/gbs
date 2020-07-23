@@ -586,7 +586,7 @@ def prepare_depsbuild_source(gnmapper, profile, arch, pkgs, url, download_path):
     sync_source(None, deps_path, url, download_path)
 
 
-def get_local_pkgs(args):
+def get_local_pkgs(r, args):
     '''get local pkgs'''
     exclude_pkgs = []
     if args.exclude:
@@ -698,7 +698,6 @@ def init_buildroot(args, profile):
 
 def main(args):
     """gbs build entry point."""
-    print (args)
     global TMPDIR
     TMPDIR = os.path.join(configmgr.get('tmpdir', 'general'), '%s-gbs' % USERID)
 
@@ -774,8 +773,28 @@ def main(args):
         r = requests.get(profile.pkgs.url)
         if r.status_code == 404:
             raise GbsError('get pkg xml from %s failed' %profile.pkgs.url)
+        exclude_pkgs = []
+        if args.exclude:
+            exclude_pkgs = args.exclude.split(',')
+        gnmapper = GerritNameMapper(r.content, repoparser.primaryxml)
+        for spec_file in gitf.specs:
+            try:
+                spec = SpecFile(spec_file)
+                if spec.name in exclude_pkgs:
+                    continue
 
-        local_pkgs = get_local_pkgs(args)
+                if args.full_build:
+                    pkg = gnmapper.get_gerritname_by_srcname(spec.name)
+                else:
+                    pkg = gnmapper.get_pkgname_by_srcname(spec.name)
+                if pkg != None:
+                    local_pkgs.append(pkg)
+                else:
+                    log.error('package %s parse failed' %spec.name)
+            except GbpError as err:
+                log.warning('gbp parse spec failed. %s' % err)
+
+
         gnmapper = GerritNameMapper(r.content, repoparser.primaryxml)
         if args.full_build:
             prepare_fullbuild_source(profile, local_pkgs, profile.source.url, download_path.path)
