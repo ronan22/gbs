@@ -27,8 +27,10 @@ from gitbuildsys import __version__
 from gitbuildsys import errors
 from gitbuildsys.parsing import subparser, GbsHelpFormatter, basename_type
 from gitbuildsys import log
-from gitbuildsys import cmd_build
+
 from gitbuildsys.utils import SearchConfAction
+
+SUPPORTED_ARCHS = ['x86_64','i586','armv6l','armv7hl','armv7l','aarch64','mips','mipsel',]
 
 
 @subparser
@@ -162,7 +164,7 @@ def build_parser(parser):
 
     group = parser.add_argument_group('build configuration options')
     group.add_argument('-A', '--arch', help='build target arch. Supported arch '
-                       'types are: %s' % ' '.join(cmd_build.SUPPORTEDARCHS))
+                       'types are: %s' % ' '.join(SUPPORTED_ARCHS))
     group.add_argument('-D', '--dist',
                         help='specify project (build) configuration file. '
                         'User can specify build config in [profile.xx] '
@@ -592,7 +594,7 @@ def depends_parser(parser):
 
     group = parser.add_argument_group('depends configuration options')
     group.add_argument('-A', '--arch', help='target arch. Supported arch '
-                       'types are: %s' % ' '.join(cmd_build.SUPPORTEDARCHS))
+                       'types are: %s' % ' '.join(SUPPORTED_ARCHS))
     group.add_argument('-D', '--dist',
                         help='specify project (build) configuration file. '
                         'User can specify build config in [profile.xx] '
