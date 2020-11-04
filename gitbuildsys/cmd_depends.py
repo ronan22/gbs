@@ -207,6 +207,8 @@ def main(args):
     if hostarch != buildarch and buildarch in CHANGE_PERSONALITY:
         cmd = [CHANGE_PERSONALITY[buildarch]] + cmd
 
+    if args.tarfile:
+        cmd += ['--tarfile']
     # Extra depanneur special command options
     cmd += prepare_depanneur_opts(args)
 

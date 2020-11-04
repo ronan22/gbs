@@ -610,6 +610,8 @@ def depends_parser(parser):
     group.add_argument('--debug', action='store_true', help='debug output')
     group.add_argument('-o', '--output',
                         help='specify output directory for reverse depends files')
+    group.add_argument('--tarfile', action='store_true',
+                        help='generate the tar file for xml file')
 
     group = parser.add_argument_group('depends env options')
     group.add_argument('-B', '--buildroot',
