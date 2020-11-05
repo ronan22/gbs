@@ -627,6 +627,8 @@ def depends_parser(parser):
                         'included while generating tar ball')
     group.add_argument('--packaging-dir',
                         help='directory containing packaging files')
+    group.add_argument('--style', default='git',
+                        help='specify source type: git, or tar, default is git')
 
     return parser
 
