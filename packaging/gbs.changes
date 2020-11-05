@@ -1,3 +1,11 @@
+* Thu Nov 05 2020 Biao Wang <biao716.wang@samsung.com> 0.25.14
+  * upgrade to gbs v0.25.14, which contains the following features:
+     * New feature and enhancements added:
+      - Improve gbs coverage ratio.
+      - Remove build dependence with python-support.
+      - Support gen depends of exported sources.
+      - Add --tarfile option for gbs depends subcommand to generate tar xml file
+
 * Tue Jul 21 2020 Biao Wang <biao716.wang@samsung.com> 0.25.13
   * upgrade to gbs v0.25.13, which contains the following features:
     * Bug fix:

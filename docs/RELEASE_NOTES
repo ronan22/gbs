@@ -1,3 +1,14 @@
+Release notes for gbs 0.25.14
+==========================
+
+- Release Date: 2020-11
+
+- New feature and enhancements added:
+    * Improve gbs coverage ratio.
+    * Remove build dependence with python-support.
+    * Support gen depends of exported sources.
+    * Add --tarfile option for gbs depends subcommand to generate tar xml file.
+
 Release notes for gbs 0.25.13
 ==========================
 
