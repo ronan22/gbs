@@ -59,6 +59,9 @@ def prepare_depanneur_opts(args):
     cmd_opts += ['--packaging-dir=%s' % get_packaging_dir(args)]
     cmd_opts += ['--depends']
 
+    if args.style:
+        cmd_opts += ['--style=%s' % args.style]
+
     return cmd_opts
 
 def prepare_repos_and_build_conf(args, arch, profile):
@@ -204,6 +207,8 @@ def main(args):
     if hostarch != buildarch and buildarch in CHANGE_PERSONALITY:
         cmd = [CHANGE_PERSONALITY[buildarch]] + cmd
 
+    if args.tarfile:
+        cmd += ['--tarfile']
     # Extra depanneur special command options
     cmd += prepare_depanneur_opts(args)
 
