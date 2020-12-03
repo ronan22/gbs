@@ -1,3 +1,13 @@
+* Thu Dec 03 2020 Jiankang Fan <jiankang.fan@samsung.com> 0.25.15
+  * upgrade to gbs v0.25.15, which contains the following features:
+    * New feature and enhancements added:
+      - Update tizen version to tizen20201203
+      - Support zstd decompression for old rpm version
+      - Support zstd arch for tar
+      - Add exception check when generating xml file
+    * Bug fix:
+      - Fix build failed when gbs full build
+
 * Thu Nov 05 2020 Biao Wang <biao716.wang@samsung.com> 0.25.14
   * upgrade to gbs v0.25.14, which contains the following features:
      * New feature and enhancements added:

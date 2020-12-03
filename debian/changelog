@@ -1,3 +1,14 @@
+gbs (0.25.15) unstable; urgency=high
+  * upgrade to gbs v0.25.15, which contains the following features:
+    * New feature and enhancements added:
+      - update tizen version to tizen20201203
+      - Support zstd decompression for old rpm version
+      - Support zstd arch for tar
+      - Add exception check when generating xml file
+    * Bug fix:
+      - Fix build failed when gbs full build
+ -- Jiankang Fan <jiankang.fan@samsung.com>  Thu, 3 Dec 2020 10:00:00 +0800
+
 gbs (0.25.14) unstable; urgency=high
   * upgrade to gbs v0.25.14, which contains the following features:
      * New feature and enhancements added:

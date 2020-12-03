@@ -1,3 +1,17 @@
+
+Release notes for gbs 0.25.15
+==========================
+
+- Release Date: 2020-12
+
+- New feature and enhancements added:
+    * update tizen version to tizen20201203
+    * Support zstd decompression for old rpm version
+    * Support zstd arch for tar
+    * Add exception check when generating xml file
+- Bug fix:
+    *  Fix build failed when gbs full build
+
 Release notes for gbs 0.25.14
 ==========================
 
