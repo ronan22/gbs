@@ -338,6 +338,10 @@ def build_parser(parser):
                         help='specify source type: git, or tar, default is git')
     group.add_argument('--export-only', action='store_true',
                         help='only export, not building')
+    group.add_argument('--preordered-list', default='',
+                        help='Provide comma(,) separated list of ordered packages '
+                        'to support user defined build order calculation.')
+
     parser.set_defaults(alias="lb")
     return parser
 
@@ -631,6 +635,8 @@ def depends_parser(parser):
                         help='directory containing packaging files')
     group.add_argument('--style', default='git',
                         help='specify source type: git, or tar, default is git')
+    group.add_argument('--local-only', action='store_true',
+                        help='generate depends only from local repo rpms')
 
     return parser
 

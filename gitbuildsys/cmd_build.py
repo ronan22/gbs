@@ -296,6 +296,10 @@ def prepare_depanneur_opts(args):
     if args.icecream > 0:
         cmd_opts += ['--icecream=%s' % args.icecream]
 
+    if args.preordered_list > 0:
+        olist = [i.strip() for i in args.preordered_list.split(',')]
+        cmd_opts += ['--preordered-list=%s' % ','.join(olist)]
+
     cmd_opts += ['--threads=%s' % args.threads]
     if args.kvm:
         loopdev = len([name for name in os.listdir('/dev') if bool(re.search("loop[0-9]",name))])
@@ -811,3 +815,4 @@ def main(args):
         raise GbsError('some packages failed to be built')
     else:
         log.info('Done')
+

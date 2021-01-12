@@ -1,4 +1,3 @@
-
 #!/usr/bin/python -tt
 # vim: ai ts=4 sts=4 et sw=4
 #
@@ -58,6 +57,9 @@ def prepare_depanneur_opts(args):
 
     cmd_opts += ['--packaging-dir=%s' % get_packaging_dir(args)]
     cmd_opts += ['--depends']
+
+    if args.local_only:
+        cmd_opts += ['--depends-local-only']
 
     if args.style:
         cmd_opts += ['--style=%s' % args.style]
@@ -209,6 +211,7 @@ def main(args):
 
     if args.tarfile:
         cmd += ['--tarfile']
+
     # Extra depanneur special command options
     cmd += prepare_depanneur_opts(args)
 
@@ -224,3 +227,4 @@ def main(args):
         raise GbsError('some packages failed to be generate depends files')
     else:
         log.info('Done')
+
