@@ -1,3 +1,8 @@
+* Fri Feb 05 2021 Biao Wang <biao716.wang@samsung.com> 0.25.16
+  * upgrade to gbs v0.25.16, which contains the following features:
+    * New feature and enhancements added:
+      - Add preordered-list and --local-only option
+
 * Thu Dec 03 2020 Jiankang Fan <jiankang.fan@samsung.com> 0.25.15
   * upgrade to gbs v0.25.15, which contains the following features:
     * New feature and enhancements added:

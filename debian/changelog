@@ -1,3 +1,10 @@
+gbs (0.25.16) unstable; urgency=high
+  * upgrade to gbs v0.25.16, which contains the following features:
+     * New feature and enhancements added:
+      - Add arguments, --preordered-list and --local-only
+
+ -- Biao Wang <biao716.wang@samsung.com>  Fri, 05 Feb 2021 12:30:00 +0800
+
 gbs (0.25.15) unstable; urgency=high
   * upgrade to gbs v0.25.15, which contains the following features:
     * New feature and enhancements added:
