@@ -613,6 +613,9 @@ def prepare_depanneur_cmd(args, buildarch, profile, workdir):
     if args.ccache:
         cmd += ['--ccache']
 
+    if args.pkg_ccache:
+        cmd += ['--pkg-ccache=%s' % args.pkg_ccache]
+
     if args.extra_packs:
         cmd += ['--extra-packs=%s' % args.extra_packs]
 
