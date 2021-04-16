@@ -37,6 +37,7 @@ Requires:   %{name}-export = %{version}-%{release}
 Requires:   %{name}-remotebuild = %{version}-%{release}
 
 BuildRequires:  python-docutils
+BuildRequires:  python-setuptools
 BuildRoot:  %{_tmppath}/%{name}-%{version}-build
 
 %description
@@ -97,6 +98,13 @@ Requires: mic
 These scripts are used by GBS local full build jenkins jobs. These
 scripts should be installed on Jenkins slave nodes.
 
+%package bsr
+Summary: Build profiling report
+
+%description bsr
+This package monitors the build status
+and generates a report using the relevant data.
+
 %prep
 %setup -q -n %{name}-%{version}
 
@@ -104,6 +112,7 @@ scripts should be installed on Jenkins slave nodes.
 %build
 %{__python} setup.py build
 make man
+pushd bsr && %{__python} setup.py build && popd
 
 %pre
 /usr/bin/getent group jenkins >/dev/null || /usr/sbin/groupadd -r jenkins &>/dev/null || :
@@ -112,6 +121,8 @@ make man
 
 %install
 %{__python} setup.py install --prefix=%{_prefix} --root=%{buildroot}
+pushd bsr && %{__python} setup.py install --prefix=%{_prefix} --root=%{buildroot} && popd
+
 
 mkdir -p %{buildroot}/%{_prefix}/share/man/man1
 mkdir -p %{buildroot}/%{_prefix}/share/gbs
@@ -151,7 +162,7 @@ rm -rf %{buildroot}
 %{python_sitelib}/gitbuildsys/cmd_submit.py*
 %{python_sitelib}/gitbuildsys/cmd_depends.py*
 %{python_sitelib}/gitbuildsys/parsing.py*
-%{_bindir}/*
+%{_bindir}/gbs
 %{_sysconfdir}/bash_completion.d
 %{_sysconfdir}/zsh_completion.d
 
@@ -191,3 +202,8 @@ rm -rf %{buildroot}
 %{scripts_dir}/job_local_full_build
 %{scripts_dir}/job_build_packagelist
 %{scripts_dir}/common_functions
+
+%files bsr
+%defattr(-,root,root,-)
+%{python_sitelib}/bsr*
+%{_bindir}/bsr

@@ -1,0 +1,3 @@
+[run]
+source = bsr
+omit = *tests*,*/__init__.py 

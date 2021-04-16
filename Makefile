@@ -14,6 +14,7 @@ endif
 
 all:
 	python setup.py build
+	cd bsr && python setup.py build && cd ..
 
 tag:
 	git tag $(VERSION)
@@ -44,10 +45,10 @@ docs: man html pdf
 
 install: all
 	python setup.py install --prefix=${PREFIX}
+	cd bsr && python setup.py install --install-scripts=/usr/local/bin --prefix=/usr/local && cd ..
 
 clean:
-	rm -rf build/
-	rm -rf dist/
-	rm -rf *.egg-info/
+	rm -rf {build/,dist/,*.egg-info/}
+	cd bsr && rm -rf {build/,dist/,*.egg-info/} && cd ..
 test:
 	nosetests -v --with-coverage --with-xunit

@@ -1,0 +1,37 @@
+## BSR
+*.pyc
+.venv*
+.python-version
+/build/
+/dist/
+*egg-info
+*.swp
+
+
+## BSR_FE
+
+# dependencies
+bsr_fe/node_modules
+bsr_fe/.pnp
+.pnp.js
+
+# testing
+bsr_fe/coverage
+
+# production
+bsr_fe/build
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.eslintcache
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# app related
+
