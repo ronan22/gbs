@@ -31,7 +31,6 @@ from lxml import etree
 import xml.etree.cElementTree as ET
 import xml.etree.ElementTree as ETP
 import subprocess
-import re
 
 from gitbuildsys.utils import Temp, Workdir, RepoParser, read_localconf, \
                               guess_spec, show_file_from_rev, \

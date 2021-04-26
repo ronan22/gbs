@@ -26,7 +26,6 @@ import urlparse
 import glob
 import requests
 import subprocess
-import re
 
 from gitbuildsys.utils import Temp, RepoParser, read_localconf
 from gitbuildsys.errors import GbsError, Usage
