@@ -9,7 +9,7 @@ usr/lib/python*/*packages/gitbuildsys/cmd_pull.py
 usr/lib/python*/*packages/gitbuildsys/cmd_submit.py
 usr/lib/python*/*packages/gitbuildsys/cmd_depends.py
 usr/lib/python*/*packages/gitbuildsys/parsing.py
-usr/bin/*
+usr/bin/gbs
 etc/bash_completion.d/*
 usr/share/man/man1/gbs.1
 usr/share/gbs/*

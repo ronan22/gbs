@@ -339,8 +339,10 @@ def build_parser(parser):
     group.add_argument('--export-only', action='store_true',
                         help='only export, not building')
     group.add_argument('--preordered-list', default='',
-                        help='Provide comma(,) separated list of ordered packages '
-                        'to support user defined build order calculation.')
+                        help='List of package to support manual ordering, '
+                        'either comma separated string or local file location.')
+    group.add_argument('--profiling', default='',
+                        help='Profiling report location to be used package ordering.')
 
     parser.set_defaults(alias="lb")
     return parser

@@ -1,0 +1,8 @@
+usr/local/lib/python*/*packages/bsr/*.py
+usr/local/lib/python*/*packages/bsr/analyzer/*.py
+usr/local/lib/python*/*packages/bsr/gbs/*.py
+usr/local/lib/python*/*packages/bsr/network/*.py
+usr/local/lib/python*/*packages/bsr/report/*.py
+usr/local/lib/python*/*packages/bsr/utility/*.py
+usr/local/lib/python*/*packages/bsr/web_dist/*
+usr/local/bin/bsr

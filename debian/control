@@ -2,7 +2,7 @@ Source: gbs
 Section: devel
 Priority: extra
 Maintainer: Jian-feng Ding <jian-feng.ding@intel.com>
-Build-Depends: debhelper, python (>= 2.6), python-docutils
+Build-Depends: debhelper, python (>= 2.6), python-docutils, python-setuptools
 Standards-Version: 3.8.0
 X-Python-Version: >= 2.6
 Homepage: http://www.tizen.org
@@ -19,6 +19,7 @@ Depends: ${misc:Depends}, ${python:Depends},
  gbs-api (= ${binary:Version}),
  gbs-export (= ${binary:Version}),
  gbs-remotebuild (= ${binary:Version}),
+ gbs-bsr (= ${binary:Version}),
  depanneur (>= 0.16.7)
 Recommends: librpm-tizen (>= 4.11.0.1.tizen20130618-tizen20131001)
 Description: Command line tools for Tizen package developers
@@ -74,3 +75,10 @@ Depends: ${misc:Depends},
  mic,
 Description: Jenkins scripts used by gbs-jenkins-job
  These scripts are used by GBS local full build jenkins jobs. These scripts should be installed on Jenkins slave nodes.
+
+Package: gbs-bsr
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends},
+ python-psutil
+Description: GBS build monitirong scripts
+ This package monitors the build status and generates report using the relevant data.

@@ -1,0 +1,367 @@
+#!/usr/bin/python
+#-*- coding: utf-8 -*-
+#
+# Copyright (c) 2021 Samsung Electronics.Co.Ltd.
+#
+# This program is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the Free
+# Software Foundation; version 2 of the License
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+# for more details.
+
+"""Build Statistics Report"""
+
+import os
+import sys
+import shutil
+import argparse
+import yaml
+
+from pprint import pprint
+
+from bsr.report.build_time import BuildTime
+from bsr.report.depends_xml import DependsXml
+from bsr.report.info_meta import gather_meta_information, reconstruct_new_format, save_result, \
+    fetch_ordered_list_from_previous_report, save_logs
+from bsr.gbs.gbs_actions import GbsAction
+from bsr.analyzer.data_analyzer import DataAnalyzer
+from bsr.utility.utils import console
+from bsr.utility.monitoring import Monitoring
+from bsr.network.dep_graph import create_build_dep_graph
+
+
+class YamlDumper(yaml.Dumper):
+    """Personal YAML dumper for 2.0 syntax indent"""
+
+    def increase_indent(self, flow=False, indentless=False):
+        return super(YamlDumper, self).increase_indent(flow, False)
+
+
+class ReportAction:
+    """Report"""
+
+    verbose = False
+    ref_report = None
+
+    roots = {'build_root': None, 'src_root': None, 'arch': None, \
+            'conf_file': None, 'style': None}
+    reference_url = None
+    ordering_options = {}
+
+    gbs = None
+    xml = None
+    buildtime = None
+    user_xml_file = None
+
+    def __init__(self, args):
+        """Initialize"""
+
+        self.ref_report = args.profiling_ref
+        self.roots['build_root'] = args.build_root
+        self.roots['src_root'] = args.src_root
+        self.roots['arch'] = args.arch
+        self.roots['conf_file'] = args.gbs_conf
+        self.roots['style'] = args.source_style
+        self.roots['user_log_dir'] = args.user_log_dir
+        self.reference_url = args.reference_url
+        self.verbose = args.verbose
+        self.user_xml_file = args.depends_xml_file
+        self.ordering_options = {'critical': args.criticalsort,
+                                 'highdeps': args.depsnumbersort,
+                                 'buildtime': args.buildtimesort}
+
+    def start(self, preview=False):
+        """Common parts"""
+
+        #### GBS related storage ####
+        self.gbs = GbsAction(self.roots, \
+                             self.user_xml_file, \
+                             self.verbose, \
+                             self.reference_url, \
+                             preview \
+                            )
+
+        #### Generate depends xml file ####
+        local_only = False
+        if preview is False:
+            local_only = True
+
+        if preview is False or \
+            (self.ordering_options.get('highdeps', False) is True \
+             or self.ordering_options.get('critical', False) is True):
+            if self.user_xml_file is None:
+                self.gbs.call_depends(style=self.roots['style'], local_only=local_only)
+            if self.gbs.depends_xml_file_content is None:
+                console('No xml file found', verbose=self.verbose)
+                return False
+
+            #### Load xml data ####
+            self.xml = DependsXml(self.gbs.depends_xml_file_content, verbose=self.verbose)
+
+            if self.xml.package_names is None or len(self.xml.package_names) <= 0:
+                console('No xml data found', verbose=self.verbose)
+                return False
+
+        #### Get build time from log files ####
+        self.buildtime = BuildTime(self.gbs.log_dir, self.reference_url, self.ref_report, \
+                                   arch=self.roots.get('arch'), verbose=self.verbose)
+
+        return True
+
+    def stop(self):
+        """Termnating the instance"""
+
+        self.gbs = None
+        self.xml = None
+
+
+def generate_preview_file(ordered_packages, out_file):
+    """YAML syntax output"""
+
+    data = {'version': 1, 'preview': {'packages': []}}
+    for package in ordered_packages:
+        data['preview']['packages'].append(package)
+    with open(out_file, 'w') as yml_out:
+        yml_out.write('{}'.format(yaml.dump(data, Dumper=YamlDumper, \
+                                            explicit_start=True, default_flow_style=False)))
+
+
+def preview_main(args):
+    """Processing pre actions before gbs build"""
+
+    console('Running preview mode with HighDeps({}), Critical({}), BuildTime({})'.format( \
+            args.depsnumbersort, args.criticalsort, args.buildtimesort), \
+            verbose=True)
+
+    def clean_output_file(fname):
+        if fname and os.path.exists(fname):
+            os.remove(fname)
+
+    clean_output_file(args.output_file)
+
+    action = ReportAction(args)
+    if action.start(preview=True) is not True:
+        return 0
+
+    output_file = os.path.join(os.getcwd(), '.bsr.preview.yaml')
+    if args.output_file:
+        output_file = args.output_file
+
+    if not os.path.isdir(os.path.dirname(output_file)):
+        os.makedirs(os.path.dirname(output_file))
+
+    clean_output_file(args.output_file)
+
+    #### Analyzing the data ###
+    inst_analyzer = DataAnalyzer(action.xml, action.buildtime.ref_build_time, \
+                                 verbose=action.verbose)
+    inst_analyzer.topology_sorting()
+    inst_analyzer.get_link_ordered_packages(buildtime_order=args.buildtimesort, \
+                                            highdeps_order=args.depsnumbersort)
+
+    #### Save to depends target directory ####
+    ordered_list = []
+    if args.criticalsort is True:
+        inst_analyzer.find_max_depth()
+        ordered_list = [x[0] for x in sorted(inst_analyzer.max_depth.items(), \
+                key=lambda item: item[1]['level'])]
+    for pkg in inst_analyzer.top_orders_without_zero:
+        if pkg not in ordered_list:
+            ordered_list.append(pkg)
+    for pkg in inst_analyzer.zero_links:
+        if pkg not in ordered_list:
+            ordered_list.append(pkg)
+
+    generate_preview_file(ordered_list, output_file)
+
+    console('Ordered list generated in {}'.format(output_file), verbose=action.verbose)
+    #if action.verbose is True:
+    #    pprint(ordered_list)
+
+    console('Enabling CPU statistics', verbose=action.verbose)
+    Monitoring().start_recording(os.path.join(os.getcwd(), 'cpu.records'))
+
+    return 0
+
+def reorder_main(args):
+    """"Simplified preview mode for gbs command"""
+
+    console('Running reorder mode with -j {}'.format(args.profiling_ref), verbose=True)
+
+    output_file = os.path.join(os.getcwd(), '.bsr.preview.yaml')
+    if args.output_file:
+        output_file = args.output_file
+
+    if output_file and os.path.exists(output_file):
+        os.remove(output_file)
+
+    if not os.path.isdir(os.path.dirname(output_file)):
+        os.makedirs(os.path.dirname(output_file))
+
+    #### Save to depends target directory ####
+    ordered_list = fetch_ordered_list_from_previous_report(args.profiling_ref, verbose=args.verbose)
+    generate_preview_file(ordered_list, output_file)
+
+    console('Ordered list generated in {}'.format(output_file), verbose=args.verbose)
+
+    console('Enabling CPU statistics', verbose=args.verbose)
+    Monitoring().start_recording(os.path.join(os.getcwd(), 'cpu.records'))
+
+    return 0
+
+def report_main(args):
+    """"Processing post actions after gbs build finished"""
+
+    console('Running report mode with HighDeps({}), Critical({}), BuildTime({})'.format( \
+            args.depsnumbersort, args.criticalsort, args.buildtimesort), \
+            verbose=True)
+
+    Monitoring().stop_recording_without_cleanup(os.path.join(os.getcwd(), 'cpu.records'))
+
+    tgt_dir = os.path.join(os.getcwd(), 'bsr_profiling_report', 'depends')
+    shutil.rmtree(os.path.dirname(tgt_dir), ignore_errors=True)
+    shutil.rmtree(os.path.join(os.getcwd(), '.sample_data'), ignore_errors=True)
+    os.makedirs(tgt_dir)
+
+    action = ReportAction(args)
+    if action.start(preview=False) is not True:
+        return 0
+
+    #### Generate depends graph ####
+    out_path = os.path.join(tgt_dir, 'dep_graph')
+    depends_dir = os.path.join(action.gbs.get_build_root(), 'local', 'depends')
+    if os.path.exists(depends_dir):
+        shutil.copytree(depends_dir, out_path)
+    elif action.user_xml_file is not None:
+        _suggest_file = os.path.join(out_path, 'default', 'arch', \
+            'default_arch_pkgdepends.xml')
+        os.makedirs(os.path.dirname(_suggest_file))
+        shutil.copyfile(action.user_xml_file, _suggest_file)
+
+    #### Analyzing the data ####
+    inst_analyzer = DataAnalyzer(action.xml, action.buildtime.build_time, \
+                                 verbose=action.verbose)
+    inst_analyzer.topology_sorting()
+    inst_analyzer.get_link_ordered_packages(buildtime_order=args.buildtimesort)
+    inst_analyzer.find_max_depth()
+
+    create_build_dep_graph(action.gbs.depends_xml_file_content, out_path, \
+            inst_analyzer.package_names)
+    shutil.copytree(os.path.join(out_path, 'default', 'arch', 'networks'), \
+                    os.path.join(tgt_dir, 'networks'))
+    print('Depends report published at {}'.format(os.path.dirname(tgt_dir)))
+
+    #### Save buildtime.json / max_depth.json ####
+    save_result(tgt_dir, 'buildtime.json', action.buildtime.build_time)
+    save_result(tgt_dir, 'buildtime_ref.json', action.buildtime.ref_build_time)
+    save_result(tgt_dir, 'max_depth.json', inst_analyzer.max_depth)
+    save_result(tgt_dir, 'depends_link.json', inst_analyzer.link_info)
+    save_result(tgt_dir, 'depends.xml', action.gbs.depends_xml_file_content, raw=True)
+
+    #### Hard link log files
+    save_logs(tgt_dir, action.roots['user_log_dir'])
+
+    #### Meta Information ####
+    meta_info = gather_meta_information( \
+            action.roots['user_log_dir'], \
+            action.buildtime.build_time, action.buildtime.ref_build_time)
+    meta_info['DeployUrl'] = args.dist_root
+    save_result(tgt_dir, 'result_meta.json', meta_info)
+
+    reconstruct_new_format(os.path.dirname(tgt_dir), meta_info, os.path.join(os.getcwd(), 'cpu.records'))
+
+    return 0
+
+
+def argument_parsing(argv):
+    """Any arguments passed in"""
+
+    parser = argparse.ArgumentParser(description='Action handlers')
+
+    # Comman shared arguments
+    base = argparse.ArgumentParser(add_help=False)
+
+    ## Dependency xml file
+    base.add_argument('-x', '--dependsxmlfile', action='store', dest='depends_xml_file', \
+                    help='Dependency xml file location, '
+                    'Other gbs related options will be ignored', default=None)
+
+    ## Reference snapshot url
+    base.add_argument('-r', '--referenceurl', action='store', dest='reference_url', \
+                    help='Url or local path of build logs', default=None)
+
+    ## Reference profiling report
+    base.add_argument('-j', '--profilingref', action='store', dest='profiling_ref', \
+                    help='Url or local path of reference profiling report', default=None)
+
+    ## GBS related parameters
+    base.add_argument('-s', '--sourceroot', action='store', dest='src_root', default=None, \
+                    help='[GBS option] Source root where you run "gbs build" command, ' \
+                    'eg. /home/guest/SRC-ROOT/tizen/unified/my_packages/')
+    base.add_argument('-b', '--buildroot', action='store', dest='build_root', default=None, \
+                    help='[GBS option] Build root, eg. /home/guest/GBS-ROOT/')
+    base.add_argument('-k', '--logdir', action='store', dest='user_log_dir', default=None, \
+                    help='[GBS option] Build log directory')
+    base.add_argument('-a', '--arch', action='store', dest='arch', default=None, \
+                    help='[GBS option] Architecture, eg. armv7l')
+    base.add_argument('-c', '--conf', action='store', dest='gbs_conf', \
+                    help='[GBS option] gbs.conf file location', default=None)
+    base.add_argument('-y', '--style', action='store', dest='source_style', \
+                    help='[GBS option] source type, eg. git/tar', default='git')
+
+    ## Ordering options
+    base.add_argument('-t', '--buildtimesort', action='store_true', \
+                    help='Whether sort packages by its build time')
+    base.add_argument('-p', '--criticalsort', action='store_true', \
+                    help='Whether sort packages by critical build path')
+    base.add_argument('-n', '--depsnumbersort', action='store_true', \
+                    help='Whether sort packages by no. of depends count')
+
+    ## Output
+
+    ## Logging option
+    base.add_argument('-v', '--verbose', action='store_true', \
+                    help='Turn on verbose log option')
+
+    ## Distribution option
+    base.add_argument('-d', '--distributionroot', action='store', dest='dist_root', default='', \
+                    help='Relative path from the hosted URL which this page load. ' \
+                         'ex) download/29129249/html/DependsGraph in case of QuickBuild.')
+
+    subparsers = parser.add_subparsers(dest='subcommands')
+
+    preview = subparsers.add_parser('preview', parents=[base])
+    preview.add_argument('-o', '--output', action='store', dest='output_file', default=None, \
+                    help='Output file name to store ordered list of packages')
+
+    reorder = subparsers.add_parser('reorder', parents=[base])
+    reorder.add_argument('-o', '--output', action='store', dest='output_file', default=None, \
+                    help='Output file name to store ordered list of packages')
+
+    report = subparsers.add_parser('report', parents=[base])
+    report.add_argument('-o', '--output', action='store', dest='output_path', default=None, \
+                    help='Output directory to store report data')
+
+    return parser.parse_args(argv[1:])
+
+
+def main(argv):
+    """Main entry"""
+
+    args = argument_parsing(argv)
+
+    if args.subcommands == 'preview':
+        return preview_main(args)
+    if args.subcommands == 'reorder':
+        return reorder_main(args)
+    if args.subcommands == 'report':
+        return report_main(args)
+
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))
