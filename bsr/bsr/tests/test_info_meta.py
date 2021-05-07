@@ -73,14 +73,14 @@ class TestInfoMeta(unittest.TestCase):
     def test_info_meta(self):
         """Check processing meta information"""
 
-        test_meta = gather_meta_information(TestInfoMeta.test_build_time, {})
+        test_meta = gather_meta_information(TestInfoMeta.test_build_time, {}, {})
         self.assertIn('BuildDetail', test_meta)
         self.assertIn('ReferenceDetail', test_meta)
 
     def test_meta_keys(self):
         """Check detailed keys exist"""
 
-        test_meta = gather_meta_information(TestInfoMeta.test_build_time, {})
+        test_meta = gather_meta_information(TestInfoMeta.test_build_time, {}, {})
         self.assertEqual(sorted(['Total', 'StartTime', 'EndTime', 'RunTime', 'Pass', 'Fail']), sorted(test_meta['BuildDetail'].keys()))
 
 
