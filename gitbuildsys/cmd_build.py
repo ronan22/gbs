@@ -245,6 +245,8 @@ def prepare_depanneur_simple_opts(args):
         cmd_opts += ['--style=%s' % args.style]
     if args.export_only:
         cmd_opts += ['--export-only']
+    if args.with_submodules:
+        cmd_opts += ['--with-submodules']
 
     return cmd_opts
 

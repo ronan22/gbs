@@ -136,6 +136,8 @@ def export_parser(parser):
     parser.add_argument('--outdir-directly', action='store_true',
                         help='Use the directory of --outdir parameter directly'
                         'rather than outdir/pkg-version-release')
+    parser.add_argument('--with-submodules', action='store_true',
+                        help='export source code also with submodule code togerther')
 
     parser.set_defaults(alias="ex")
     return parser
@@ -343,6 +345,8 @@ def build_parser(parser):
                         'either comma separated string or local file location.')
     group.add_argument('--profiling', default='',
                         help='Profiling report location to be used package ordering.')
+    group.add_argument('--with-submodules', action='store_true',
+                        help='build project with submodules togerther')
 
     parser.set_defaults(alias="lb")
     return parser

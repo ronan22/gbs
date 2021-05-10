@@ -205,6 +205,8 @@ def create_gbp_export_args(repo, commit, export_dir, tmp_dir, spec, args,
                     ])
     else:
         argv.extend(["--git-builder=osc", "--git-no-build"])
+    if args.with_submodules:
+        argv.append('--git-submodules')
 
     return argv
 
