@@ -1,3 +1,13 @@
+gbs (0.25.18) unstable; urgency=high
+  * upgrade to gbs v0.25.18, which contains the following features:
+     * New feature and enhancements added:
+      - New feature: Build Profiling.
+      - Fix pylint error: Reimport 're'.
+      - Fix pylint error issue for bsr directory.
+      - New feature: add --submodules option to support build with submodule.
+
+ -- Biao Wang <biao716.wang@samsung.com>  Fri, 14 May 2021 12:30:00 +0800
+
 gbs (0.25.17) unstable; urgency=high
   * upgrade to gbs v0.25.17, which contains the following features:
      * New feature and enhancements added:

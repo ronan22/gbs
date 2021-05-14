@@ -15,12 +15,12 @@ Depends: ${misc:Depends}, ${python:Depends},
  python-lxml,
  sudo,
  osc (>= 0.132.6),
- git-buildpackage-rpm (>= 0.9.20-tizen20200522),
+ git-buildpackage-rpm (>= 0.9.21-tizen20210514),
  gbs-api (= ${binary:Version}),
  gbs-export (= ${binary:Version}),
  gbs-remotebuild (= ${binary:Version}),
  gbs-bsr (= ${binary:Version}),
- depanneur (>= 0.16.7)
+ depanneur (>= 0.16.11)
 Recommends: librpm-tizen (>= 4.11.0.1.tizen20130618-tizen20131001)
 Description: Command line tools for Tizen package developers
  The command line tools for Tizen package developers will
