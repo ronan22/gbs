@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2021 Samsung Electronics.Co.Ltd.
 #
@@ -65,7 +65,7 @@ class DependsXml:
 
         self.package_names = list(bucket.keys())
         self.nodes = list(range(len(self.package_names)))
-        self.edges = { k: [] for k in self.nodes }
+        self.edges = {k: [] for k in self.nodes}
         self.in_degree = [0] * len(self.package_names)
 
     def construct_mapping(self, bucket, sub_to_main_map):

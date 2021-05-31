@@ -2,9 +2,9 @@
 
 __title__ = 'bsr'
 __description__ = 'Tizen Build Statistics Reporter.'
-__url__ = 'https://review.tizen.org'
-__version__ = '0.0.4'
-__build__ = 0x20201223
+__url__ = 'https://tizen.org'
+__version__ = '0.0.5'
+__build__ = 0x20210531
 __author__ = 'Hyokeun Jeon'
 __author_email__ = 'hyokeun.jeon@samsung.com'
 __license__ = 'Apache 2.0'

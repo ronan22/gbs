@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """A setuptools based setup module.
 """
 
@@ -15,7 +17,7 @@ requires = [
 
 about = {}
 with open(os.path.join(here, 'bsr', '__version__.py'), 'r') as f:
-    exec(f.read(), about)
+    exec(f.read(), about) # pylint: disable=exec-used
 
 with open('README.md', 'r') as f:
     readme = f.read()

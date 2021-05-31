@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2021 Samsung Electronics.Co.Ltd.
 #
@@ -56,7 +56,7 @@ class DataAnalyzer:
             sorted_b = {}
             for pkg in self.build_time:
                 sorted_b[self.build_time[pkg].get('package')] = \
-                        self.build_time[pkg].get('duration')
+                    self.build_time[pkg].get('duration')
             self.sorted_buildtime = sorted(sorted_b, key=sorted_b.get, reverse=True)
 
             # Fake xml info from buildtime
@@ -110,7 +110,7 @@ class DataAnalyzer:
                         pkg_list.append(src)
 
         console('We have #{} packages which links to chromium-efl.'.format( \
-                len(pkg_list)), verbose=self.verbose)
+            len(pkg_list)), verbose=self.verbose)
         return [self.package_names[item] for item in reversed(pkg_list)]
 
     def get_link_counts_map(self):
@@ -119,7 +119,7 @@ class DataAnalyzer:
         if self.count_link_map is not None:
             return
 
-        count_link = { x: [0] * len(self.nodes) for x in self.nodes }
+        count_link = {x: [0] * len(self.nodes) for x in self.nodes}
         for level in range(len(self.topology_sorted) - 1, -1, -1):
             for package in self.topology_sorted[level]:
                 for dep in self.edges[package]:
@@ -152,20 +152,23 @@ class DataAnalyzer:
             for package in self.topology_sorted[level]:
                 if level not in link_data:
                     link_data[level] = []
-                link_data[level].append({'package': package,
-                                         'links': sum(self.count_link_map[package])})
+                link_data[level].append({
+                    'package': package,
+                    'links': sum(self.count_link_map[package])
+                })
 
         for level in link_data:
-            link_data[level] = sorted(link_data[level], key = lambda a: a['links'], reverse=True)
+            link_data[level] = sorted(link_data[level], key=lambda a: a['links'], reverse=True)
 
         link_list = [{}] * len(self.package_names)
         for level in link_data:
             for y_depth, item in enumerate(link_data[level]):
-                link_list[item.get('package')] = {'level': level, \
-                        'links': item.get('links'), 'y': y_depth}
+                link_list[item.get('package')] = {
+                    'level': level, \
+                    'links': item.get('links'), 'y': y_depth
+                }
 
         return link_list
-
 
     def get_link_ordered_packages(self, buildtime_order=False, highdeps_order=True):
         """Calculate link number based sorted list"""
@@ -201,8 +204,10 @@ class DataAnalyzer:
         self.zero_links = sorted(self.zero_links)
         self.zero_links = self._work_with_buildtime(buildtime_order)
 
-        link_info = {'nodes': self.nodes, 'edges_full': self.edges, 'links': {}, \
-                     'package_names': self.package_names}
+        link_info = {
+            'nodes': self.nodes, 'edges_full': self.edges, 'links': {}, \
+            'package_names': self.package_names
+        }
 
         link_info['links'] = self.generate_link_data()
         self.link_info = link_info
@@ -287,22 +292,20 @@ class DataAnalyzer:
                             new_edges[pkg].append(dep_pkg)
             for pkg in topo_sorted[-1]:
                 new_edges[pkg] = []
-            #for edge_n in edges:
-            #    new_edges[edge_n] = edges[edge_n][:]
 
             return new_edges
 
-
         # Fill blank build time
-        build_t = { pkg_id: {'duration': 0} for pkg_id in range(len(self.package_names)) }
+        build_t = {pkg_id: {'duration': 0} for pkg_id in range(len(self.package_names))}
         for item in self.build_time:
             pkg_name = self.build_time[item]['package']
             if pkg_name not in self.package_names:
                 continue
             build_t[self.package_names.index(pkg_name)] = \
-                    {'duration': self.build_time[item]['duration'], \
-                     'start': to_timestamp(self.build_time[item]['start']), \
-                     'end': to_timestamp(self.build_time[item]['end']) \
+                {
+                    'duration': self.build_time[item]['duration'], \
+                    'start': to_timestamp(self.build_time[item]['start']), \
+                    'end': to_timestamp(self.build_time[item]['end']) \
                     }
 
         topology_orig = self.topology_sorted
@@ -313,7 +316,7 @@ class DataAnalyzer:
             if search_from == -1:
                 break
             topology_sorted = trim_levels(topology_orig, search_from, \
-                    search_to, self.edges, build_t)
+                                          search_to, self.edges, build_t)
             new_edges = gen_trimmed_edges(topology_sorted, self.edges)
 
             all_path = []
@@ -354,20 +357,21 @@ class DataAnalyzer:
                         'start' in build_t[package_idx] and \
                         'end' in build_t[prev_package_idx]:
                     package_waittime = build_t[package_idx]['start'] \
-                                     - build_t[prev_package_idx]['end']
+                                       - build_t[prev_package_idx]['end']
             total_buildtime += package_buildtime
             total_waittime += package_waittime
             console('[{}/{}] {} (build: {}, wait: {})'.format( \
-                    idx + 1, \
-                    package_levels[package_idx], \
-                    self.package_names[package_idx], \
-                    package_buildtime, package_waittime), \
-                    verbose=self.verbose \
-                   )
+                idx + 1, \
+                package_levels[package_idx], \
+                self.package_names[package_idx], \
+                package_buildtime, package_waittime), \
+                verbose=self.verbose \
+                )
             build_log[self.package_names[package_idx]] = \
-                    {'level': package_levels[package_idx], \
-                     'buildtime': package_buildtime, \
-                     'waittime': package_waittime \
+                {
+                    'level': package_levels[package_idx], \
+                    'buildtime': package_buildtime, \
+                    'waittime': package_waittime \
                     }
 
         self.max_depth = build_log

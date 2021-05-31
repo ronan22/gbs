@@ -20,8 +20,6 @@ import shutil
 import argparse
 import yaml
 
-from pprint import pprint
-
 from bsr.report.build_time import BuildTime
 from bsr.report.depends_xml import DependsXml
 from bsr.report.info_meta import gather_meta_information, reconstruct_new_format, save_result, \
@@ -33,6 +31,7 @@ from bsr.utility.monitoring import Monitoring
 from bsr.network.dep_graph import create_build_dep_graph
 
 
+# pylint: disable=R0901,R1725
 class YamlDumper(yaml.Dumper):
     """Personal YAML dumper for 2.0 syntax indent"""
 
@@ -40,6 +39,7 @@ class YamlDumper(yaml.Dumper):
         return super(YamlDumper, self).increase_indent(flow, False)
 
 
+# pylint: disable=R0902
 class ReportAction:
     """Report"""
 
@@ -271,7 +271,7 @@ def report_main(args):
     meta_info['DeployUrl'] = args.dist_root
     save_result(tgt_dir, 'result_meta.json', meta_info)
 
-    reconstruct_new_format(os.path.dirname(tgt_dir), meta_info, os.path.join(os.getcwd(), 'cpu.records'))
+    reconstruct_new_format(os.path.dirname(tgt_dir), os.path.join(os.getcwd(), 'cpu.records'))
 
     return 0
 

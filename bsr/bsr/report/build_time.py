@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2021 Samsung Electronics.Co.Ltd.
 #
@@ -40,7 +40,7 @@ class BuildTime:
     rxc = r'.*Using BUILD_ROOT=.*[_.]([\d]+)'
     rxp = r'.* processing recipe .*/(.*)-([0-9a-zA-Z.+]+-[0-9.]+)/.*.spec .*'
 
-
+    # pylint: disable=R0913
     def __init__(self, local_log_dir=None, reference_url=None, profile_ref=None, \
                  logtype=None, arch=None, verbose=False):
         """Initialize"""
@@ -52,7 +52,6 @@ class BuildTime:
 
         self.build_time = self.process_local(local_log_dir)
         self.ref_build_time = self.process_reference(reference_url, profile_ref)
-
 
     def process_local(self, local_path):
         """Parse all the log files from local"""
@@ -88,7 +87,6 @@ class BuildTime:
 
         return build_time
 
-
     def process_profile_ref(self, url):
         """Directly get the data from the previous profiling report"""
 
@@ -114,21 +112,18 @@ class BuildTime:
                     prev_data = json.load(prev_f)
             except ValueError:
                 prev_data = {}
-                pass
             try:
                 for pkg_name in prev_data:
                     prev_data[pkg_name]['end'] = datetime.strptime( \
-                            prev_data[pkg_name]['end'], '%Y-%m-%d %H:%M:%S')
+                        prev_data[pkg_name]['end'], '%Y-%m-%d %H:%M:%S')
                     prev_data[pkg_name]['start'] = datetime.strptime( \
-                            prev_data[pkg_name]['start'], '%Y-%m-%d %H:%M:%S')
+                        prev_data[pkg_name]['start'], '%Y-%m-%d %H:%M:%S')
             except KeyError:
                 prev_data = {}
-                pass
             console('Ref build time data... {}'.format(len(prev_data)), verbose=self.verbose)
             os.remove(output_filename)
 
         return prev_data
-
 
     def process_reference(self, remote_url=None, profile_ref=None):
         """Parse all the log files from reference"""
@@ -155,7 +150,6 @@ class BuildTime:
 
         return build_time
 
-
     def get_all_files(self, local_path):
         """Find all text files"""
 
@@ -179,7 +173,6 @@ class BuildTime:
         console('Total {} files stacked...'.format(len(candidates)), verbose=self.verbose)
         return candidates
 
-
     def get_buildlogs_from_url(self, url):
         """Wget log files from url"""
 
@@ -188,14 +181,13 @@ class BuildTime:
             if '/repos/' in url:
                 _url = url.split('/repos/')[0] + '/'
                 main_command = 'wget -q --no-proxy {}/'.format(_url)
-                ret = subprocess.call('{}'.format(main_command), \
-                                      stdout=sys.stdout, stderr=sys.stderr, shell=True)
+                subprocess.call('{}'.format(main_command), \
+                                stdout=sys.stdout, stderr=sys.stderr, shell=True)
                 if os.path.isfile('index.html'):
                     with open('index.html', 'r') as index_f:
                         if 'builddata' in index_f.read():
                             return _url
             return url
-
 
         if not url.endswith('/'):
             url = url + '/'
@@ -218,7 +210,6 @@ class BuildTime:
 
         return work_dir
 
-
     def switch_regex_patterns(self, log_type=None):
         """Different regex between OBS and GBS"""
 
@@ -236,7 +227,6 @@ class BuildTime:
             self.rxs = r'.*\].* (.*) .*started.*build (.*).spec.* at (.*).$'
             self.rxe = r'.*\].* (.*) (finished|failed).*build (.*).spec.* at (.*).$'
             self.rxp = r'.* processing recipe .*/(.*)-([0-9a-zA-Z.+]+-[0-9.]+)/.*.spec .*'
-
 
     def parse_logfile(self, logfile):
         """Parsing log file"""
@@ -283,6 +273,6 @@ class BuildTime:
             if hostname and package and start and end and thread:
                 thread_no = '{}:{}'.format(hostname, str(thread))
                 return thread_no, package, str_to_date(start, 9), str_to_date(end, 9), \
-                        build_result, release_version
+                       build_result, release_version
 
         return None, None, None, None, None, None

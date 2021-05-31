@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #
 # Copyright (c) 2021 Samsung Electronics.Co.Ltd.
 #
@@ -27,7 +27,7 @@ import subprocess
 
 from datetime import datetime
 
-from bsr.utility.utils import json_datetime_serializer, get_ip_address, console, pushd
+from bsr.utility.utils import json_datetime_serializer, console, pushd
 from bsr.utility.monitoring import Monitoring
 
 
@@ -79,25 +79,27 @@ def gather_meta_information(user_log_dir, build_time, ref_build_time):
         check_dir = '/logs/'.join(check_dir.split('/logs/')[:-1])
 
         if os.path.isfile(os.path.join(check_dir, 'report.json')):
+            # pylint: disable=W0703
             try:
                 with open(os.path.join(check_dir, 'report.json'), 'r') as report_f:
-                    rd = json.load(report_f)
-                    if rd and 'summary' in rd:
-                        if 'packages_total' in rd['summary']:
-                            report_data['total'] = int(rd['summary']['packages_total'])
-                        if 'packages_succeeded' in rd['summary']:
-                            report_data['pass'] = int(rd['summary']['packages_succeeded'])
-                        if 'packages_build_error' in rd['summary']:
-                            report_data['fail'] = int(rd['summary']['packages_build_error'])
-                        if 'packages_expansion_error' in rd['summary']:
-                            report_data['dep_err'] = int(rd['summary']['packages_expansion_error'])
-                        if 'packages_export_error' in rd['summary']:
-                            report_data['exp_err'] = int(rd['summary']['packages_export_error'])
-            except ValueError, IOError:
-                pass
+                    report_j = json.load(report_f)
+                    if report_j and 'summary' in report_j:
+                        if 'packages_total' in report_j['summary']:
+                            report_data['total'] = int(report_j['summary']['packages_total'])
+                        if 'packages_succeeded' in report_j['summary']:
+                            report_data['pass'] = int(report_j['summary']['packages_succeeded'])
+                        if 'packages_build_error' in report_j['summary']:
+                            report_data['fail'] = int(report_j['summary']['packages_build_error'])
+                        if 'packages_expansion_error' in report_j['summary']:
+                            report_data['dep_err'] = \
+                                int(report_j['summary']['packages_expansion_error'])
+                        if 'packages_export_error' in report_j['summary']:
+                            report_data['exp_err'] = \
+                                int(report_j['summary']['packages_export_error'])
+            except Exception as err:
+                console('Error for reading report json: {}'.format(repr(err)))
 
         return report_data
-
 
     report_data = parse_report_json_file(user_log_dir)
 
@@ -112,7 +114,8 @@ def gather_meta_information(user_log_dir, build_time, ref_build_time):
     if report_data['total'] > 0:
         meta['BuildDetail']['Total'] = report_data['total']
         meta['BuildDetail']['Pass'] = report_data['pass']
-        meta['BuildDetail']['Fail'] = report_data['fail'] + report_data['exp_err'] + report_data['dep_err']
+        meta['BuildDetail']['Fail'] = report_data['fail'] \
+                                      + report_data['exp_err'] + report_data['dep_err']
 
     meta['ReferenceDetail']['Total'] = len(ref_build_time)
     meta['ReferenceDetail']['StartTime'] = ref_start
@@ -122,7 +125,7 @@ def gather_meta_information(user_log_dir, build_time, ref_build_time):
     return meta
 
 
-def reconstruct_new_format(sample_dir, meta, cpu_file):
+def reconstruct_new_format(sample_dir, cpu_file):
     """Re-construct new format"""
 
     # Resource Monitoring Data
@@ -145,9 +148,9 @@ def reconstruct_new_format(sample_dir, meta, cpu_file):
     # bsr_fe/build/ -> depends_out/
     script_dir = os.path.dirname(os.path.realpath(__file__))
     frontend_dist_dir = os.path.join(os.path.dirname(os.path.dirname(script_dir)), \
-            'bsr', 'web_dist')
+                                     'bsr', 'web_dist')
     shutil.copytree(frontend_dist_dir, sample_dir)
-    #shutil.rmtree(os.path.join(sample_dir, 'sample_data'))
+    # shutil.rmtree(os.path.join(sample_dir, 'sample_data'))
     # .sample_data/ -> depends_out/sample_data/
     shutil.move(tmp_sample_dir, os.path.join(sample_dir, 'sample_data'))
 
@@ -165,6 +168,7 @@ def save_result(target_dir, filename, input_data, raw=False):
             json.dump(input_data, result_f, default=json_datetime_serializer)
 
 
+# pylint: disable=R0914
 def save_logs(target_dir, source_dir):
     """Hard link log files"""
 
@@ -185,7 +189,7 @@ def fetch_ordered_list_from_previous_report(profiling_ref, verbose=False):
         local_dl = None
         try:
             if os.path.isfile(os.path.join(path, 'buildtime.json')) \
-                and os.path.isfile(os.path.join(path, 'depends_link.json')):
+                    and os.path.isfile(os.path.join(path, 'depends_link.json')):
                 with open(os.path.join(path, 'buildtime.json'), 'r') as bt_file:
                     local_bt = json.load(bt_file)
                 with open(os.path.join(path, 'depends_link.json'), 'r') as link_file:
@@ -194,10 +198,8 @@ def fetch_ordered_list_from_previous_report(profiling_ref, verbose=False):
                 console('Fetch failed...', verbose=verbose)
         except ValueError as err:
             console('Fetch exception... {}'.format(repr(err)), verbose=verbose)
-            pass
 
         return [local_bt, local_dl]
-
 
     url = profiling_ref
     if not url.endswith('/'):
@@ -218,15 +220,14 @@ def fetch_ordered_list_from_previous_report(profiling_ref, verbose=False):
             options = 'wget -q -r -nH -np -l 10 --cut-dirs=100 '
             main_command = '{} {} {}/'.format(options, ar_files, url)
 
-            ret = subprocess.call('{}'.format(main_command), \
-                                  stdout=sys.stdout, stderr=sys.stderr, shell=True)
+            subprocess.call('{}'.format(main_command), \
+                            stdout=sys.stdout, stderr=sys.stderr, shell=True)
 
         build_time_data, depends_link_data = read_json_data(work_dir)
         shutil.rmtree(work_dir, ignore_errors=True)
 
     elif os.path.isdir(url):
         build_time_data, depends_link_data = read_json_data(url)
-
 
     ordered_list = []
 
