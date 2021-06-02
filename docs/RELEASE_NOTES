@@ -1,3 +1,11 @@
+Release notes for gbs 0.25.19
+==========================
+
+- Release Date: 2021-6
+
+- New feature and enhancements added:
+    * New feature: BSR: Support memory profiling.
+
 Release notes for gbs 0.25.18
 ==========================
 

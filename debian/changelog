@@ -1,3 +1,10 @@
+gbs (0.25.19) unstable; urgency=high
+  * upgrade to gbs v0.25.19, which contains the following features:
+     * New feature and enhancements added:
+      - New feature: BSR: Support memory profiling.
+
+ -- Biao Wang <biao716.wang@samsung.com>  Wed, 2 Jun 2021 12:30:00 +0800
+
 gbs (0.25.18) unstable; urgency=high
   * upgrade to gbs v0.25.18, which contains the following features:
      * New feature and enhancements added:
