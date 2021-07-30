@@ -1,4 +1,3 @@
-#
 # Copyright (c) 2021 Samsung Electronics.Co.Ltd.
 #
 # This program is free software; you can redistribute it and/or modify it
@@ -29,6 +28,8 @@ class TestBuildTime(unittest.TestCase):
     """Testing build_time.py"""
 
     local_log_dir = None
+    remote_profile_log_url = os.getenv('BuildProfiling_Test_Url')
+    remote_profile_report_url = os.getenv('BuildProfiling_Test_Report_Url')
     test_packages = {
         'package-a': {'start_time': 'Mon Mar 2 23:31:45 UTC 2021', 'end_time': 'Mon Mar 2 23:50:21 UTC 2021', 'thread_no': 0},
         'package-b': {'start_time': 'Mon Mar 2 23:50:23 UTC 2021', 'end_time': 'Tue Mar 3 00:34:11 UTC 2021', 'thread_no': 0},
@@ -100,6 +101,40 @@ class TestBuildTime(unittest.TestCase):
         self.assertEqual('1.16.0-0', b.build_time['package-b']['version'])
         self.assertEqual('pass', b.build_time['package-b']['status'])
         self.assertEqual(2628, int(b.build_time['package-b']['duration']))
+
+    def test_search_remote_logfile_negative(self):
+        """Check finding remote log files"""
+
+        with self.assertRaises(Exception):
+            b = BuildTime(local_log_dir=TestBuildTime.local_log_dir, \
+                          reference_url=TestBuildTime.remote_profile_log_url, \
+                          verbose=True)
+
+    def test_search_remote_profile_result_negative(self):
+        """Check finding logs from previous profling report"""
+
+        b = BuildTime(local_log_dir=TestBuildTime.local_log_dir, verbose=True)
+        self.assertNotEqual(len(b.build_time), 0)
+
+        try:
+            b = BuildTime(local_log_dir=TestBuildTime.local_log_dir, \
+                          reference_url=None, \
+                          profile_ref=TestBuildTime.remote_profile_report_url, \
+                          verbose=True)
+        except Exception:
+            pass
+
+    def test_build_time_profile_ref_negative(self):
+        """Check profile reference"""
+
+        b = BuildTime(local_log_dir=TestBuildTime.local_log_dir, verbose=True)
+        self.assertNotEqual(len(b.build_time), 0)
+
+        try:
+            b.process_profile_ref(TestBuildTime.remote_profile_report_url)
+        except Exception:
+            pass
+
 
 
 if __name__ == '__main__':

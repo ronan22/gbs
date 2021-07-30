@@ -1,4 +1,3 @@
-#
 # Copyright (c) 2021 Samsung Electronics.Co.Ltd.
 #
 # This program is free software; you can redistribute it and/or modify it
@@ -55,6 +54,9 @@ repos = repo.tizen_base
 url = http://download.tizen.org/snapshots/tizen/base/latest/repos/standard/packages/
 ''')
 
+        TestGbsAction.reference_build_url = os.getenv('BuildProfiling_Test_Url')
+
+
     def tearDown(self):
         """Destroy fixture"""
 
@@ -66,8 +68,48 @@ url = http://download.tizen.org/snapshots/tizen/base/latest/repos/standard/packa
     def test_gbs_action(self):
         """Check gbs parameters"""
 
-        g = GbsAction(roots=TestGbsAction.test_gbs_param)
+        g = GbsAction(roots=TestGbsAction.test_gbs_param, verbose=True)
         self.assertEqual('armv7l', g.configs['arch'])
+
+    def test_gbs_action_with_conf(self):
+        """Check .gbs.conf.bsr"""
+
+        shutil.copy(TestGbsAction.test_gbs_param['conf_file'],
+                    os.path.join(os.getcwd(), '.gbs.conf.bsr'))
+        g = GbsAction(roots=TestGbsAction.test_gbs_param, verbose=True)
+        self.assertEqual('armv7l', g.configs['arch'])
+
+    def test_gbs_action_preview_negative(self):
+        """Check preview option"""
+
+        g = GbsAction(roots=TestGbsAction.test_gbs_param, preview=True, verbose=True)
+        self.assertEqual('armv7l', g.configs['arch'])
+
+    def test_gbs_action_previe_with_ref_negative(self):
+        """Check preview option with reference"""
+
+        try:
+            g = GbsAction(roots=TestGbsAction.test_gbs_param, preview=True, verbose=True, \
+                          reference_url=TestGbsAction.reference_build_url)
+            self.assertEqual('armv7l', g.configs['arch'])
+        except Exception:
+            pass
+
+    def test_gbs_action_depends_negative(self):
+        """Check gbs depends command"""
+
+        g = GbsAction(roots=TestGbsAction.test_gbs_param, verbose=True)
+        self.assertEqual('armv7l', g.configs['arch'])
+
+        try:
+            g.call_depends()
+        except Exception:
+            pass
+
+        try:
+            g.find_depends_xml_file()
+        except Exception:
+            pass
 
 
 if __name__ == '__main__':

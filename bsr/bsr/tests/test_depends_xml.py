@@ -1,4 +1,3 @@
-#
 # Copyright (c) 2021 Samsung Electronics.Co.Ltd.
 #
 # This program is free software; you can redistribute it and/or modify it
@@ -54,8 +53,8 @@ class TestReadXmlFile(unittest.TestCase):
 
         try:
             os.remove(TestReadXmlFile.testcontent)
-        except:
-            pass
+        except (IOError, OSError) as e:
+            print('Error removing test file')
 
     def test_read_dep_xml(self):
         """Check package names"""
@@ -83,7 +82,7 @@ class TestReadXmlFile(unittest.TestCase):
         for package_id in d.nodes:
             self.assertIsInstance(package_id, int)
 
-    def test_check_edges(self):
+    def test_check_edges_negative(self):
         """Check edge list"""
 
         # edges = {0: [1, 2], 1: [], 2: []}
@@ -94,7 +93,7 @@ class TestReadXmlFile(unittest.TestCase):
         self.assertIn(1, d.edges)
         self.assertIn(2, d.edges)
 
-    def test_check_indegree(self):
+    def test_check_indegree_negative(self):
         """Check in degree list for topology sorting"""
 
         # in_degree = [0, 1, 1]

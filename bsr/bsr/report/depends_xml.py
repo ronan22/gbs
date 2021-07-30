@@ -54,7 +54,7 @@ class DependsXml:
                 bucket[src_name]['subpkg'].append(src_name)
             if src_name not in sub_to_main_map:
                 sub_to_main_map[src_name] = src_name
-        console('Loaded... # of total packages: {}'.format(len(bucket.keys())), \
+        console('Loaded... # of total packages: {}'.format(len(bucket)), \
                 verbose=self.verbose)
 
         self.init_items(bucket)

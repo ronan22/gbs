@@ -262,7 +262,7 @@ def report_main(args):
     save_result(tgt_dir, 'depends.xml', action.gbs.depends_xml_file_content, raw=True)
 
     #### Hard link log files
-    save_logs(tgt_dir, action.roots['user_log_dir'])
+    #save_logs(tgt_dir, action.roots['user_log_dir'])
 
     #### Meta Information ####
     meta_info = gather_meta_information( \

@@ -1,4 +1,3 @@
-#
 # Copyright (c) 2021 Samsung Electronics.Co.Ltd.
 #
 # This program is free software; you can redistribute it and/or modify it
@@ -99,7 +98,7 @@ class TestNetwork(unittest.TestCase):
 
         self.assertTrue(os.path.isfile(os.path.join(TestNetwork.network_root, '9999.json')))
 
-    def test_partial_full_keys(self):
+    def test_partial_full_keys_negative(self):
         """Check all the keys are included for partial/full"""
 
         create_build_dep_graph(TestNetwork.test_xml_content, TestNetwork.depends_root, TestNetwork.package_names)
@@ -112,7 +111,7 @@ class TestNetwork(unittest.TestCase):
                              "prn", "pre", "prl", "frn", "fre", "frl"]:
                 self.assertIn(type_key, network_json)
 
-    def test_json_data(self):
+    def test_json_data_negative(self):
         """Check json data"""
 
         create_build_dep_graph(TestNetwork.test_xml_content, TestNetwork.depends_root, TestNetwork.package_names)
