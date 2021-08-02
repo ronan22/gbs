@@ -36,10 +36,11 @@ class Monitoring:
         values = []
 
         if os.path.isfile(target_file):
-            with open(target_file, 'r') as cpu_rec:
-                for item in cpu_rec.readlines()[1:]:
-                    tstamp, usage = item.strip().split(',')
-                    values.append([int(tstamp), float(usage)])
+            with open(target_file, 'r') as hw_rec:
+                for item in hw_rec.readlines()[1:]:
+                    tstamp, cpu_usage, mem_usage = item.strip().split(',')
+                    values.append([int(tstamp), \
+                                   round(float(cpu_usage), 2), round(float(mem_usage), 2)])
 
         return values
 
@@ -50,10 +51,17 @@ class Monitoring:
 
         stringed_command = """import time, psutil
 while True:
-    with open('__DEST__', 'a') as wf: 
-        wf.write('{},{}\\n'.format(int(time.time()), psutil.cpu_percent(interval=5)))
-    if sum(1 for line in open('__DEST__')) > 7200:
-        break
+    with open('__DEST__', 'a') as wf:
+        wf.write('{},{},{}\\n'.format(int(time.time()),
+            round(psutil.cpu_percent(interval=5), 2),
+            round(float(psutil.virtual_memory().used)/1024/1024/1024, 2)))
+    if sum(1 for line in open('__DEST__')) > 17280:
+         break
+    try:
+        if len([x.name() for x in psutil.process_iter() if 'depanneur' in x.name()]) <= 0:
+            break
+    except Exception as err:
+        pass
 """.replace('__DEST__', target_file)
 
         pid = subprocess.Popen(['python', '-c', stringed_command]).pid
