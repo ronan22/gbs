@@ -1,3 +1,13 @@
+* Fri Sep 03 2021 Biao Wang <biao716.wang@samsung.com> 0.25.21
+  * upgrade to gbs v0.25.20, which contains the following features:
+    * New feature and enhancements added:
+      - Rollback mis-commited changes.
+      - Profiling - Do not save log files.
+      - Fix VMInstall package is not installed.
+      - Fix kvm support in Ubuntu.
+      - Use the defalut uid:gid in /usr/bin/build.
+      - Append extra sub packages after build finished.
+
 * Tue Jul 13 2021 Biao Wang <biao716.wang@samsung.com> 0.25.20
   * upgrade to gbs v0.25.20, which contains the following features:
     * New feature and enhancements added:

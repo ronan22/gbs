@@ -1,3 +1,16 @@
+Release notes for gbs 0.25.21
+==========================
+
+- Release Date: 2021-9
+
+- New feature and enhancements added:
+    * Rollback mis-commited changes.
+    * Profiling - Do not save log files.
+    * Fix VMInstall package is not installed.
+    * Fix kvm support in Ubuntu.
+    * Use the defalut uid:gid in /usr/bin/build.
+    * Append extra sub packages after build finished.
+
 Release notes for gbs 0.25.20
 ==========================
 
