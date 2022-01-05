@@ -1,3 +1,12 @@
+Release notes for gbs 0.25.22
+==========================
+
+- Release Date: 2022-1
+
+- New feature and enhancements added:
+    * Fix build error with --incremental option.
+    *  Upgrade depanneur version to 0.16.15.
+
 Release notes for gbs 0.25.21
 ==========================
 

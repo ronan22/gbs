@@ -1,3 +1,10 @@
+* Wed Jan 05 2022 Biao Wang <biao716.wang@samsung.com> 0.25.22
+  * upgrade to gbs v0.25.22, which contains the following features:
+    * New feature and enhancements added:
+      - Fix build error with --incremental option.
+      - Upgraded depanneur version to 0.16.15.
+
+
 * Fri Sep 03 2021 Biao Wang <biao716.wang@samsung.com> 0.25.21
   * upgrade to gbs v0.25.20, which contains the following features:
     * New feature and enhancements added:

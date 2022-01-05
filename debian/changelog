@@ -1,3 +1,11 @@
+gbs (0.25.22) unstable; urgency=high
+  * upgrade to gbs v0.25.22, which contains the following features:
+     * New feature and enhancements added:
+      - Fix build error with --incremental option.
+      - Upgraded depanneur version to 0.16.15
+
+ -- Biao Wang <biao716.wang@samsung.com>  Wed, 05 Jan 2022 12:30:00 +0800
+
 gbs (0.25.21) unstable; urgency=high
   * upgrade to gbs v0.25.21, which contains the following features:
      * New feature and enhancements added:
