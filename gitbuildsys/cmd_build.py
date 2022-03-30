@@ -69,6 +69,8 @@ SUPPORTEDARCHS = [
     'aarch64',
     'mips',
     'mipsel',
+    'riscv32',
+    'riscv64',
     ]
 
 USERID = pwd.getpwuid(os.getuid())[0]
