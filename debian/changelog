@@ -1,3 +1,11 @@
+gbs (0.25.23) unstable; urgency=high
+  * upgrade to gbs v0.25.23, which contains the following features:
+     * New feature and enhancements added:
+      - Fix umount abnormal issue in Ubuntu 20.04.
+      - Upgraded depanneur version to 0.16.16
+
+ -- Biao Wang <biao716.wang@samsung.com>  Wed, 27 Apr 2022 12:30:00 +0800
+
 gbs (0.25.22) unstable; urgency=high
   * upgrade to gbs v0.25.22, which contains the following features:
      * New feature and enhancements added:
