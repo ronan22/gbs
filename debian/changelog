@@ -1,3 +1,11 @@
+gbs (0.25.24) unstable; urgency=high
+  * upgrade to gbs v0.25.24, which contains the following features:
+     * New feature and enhancements added:
+      - Fix Build error dlog aarch64.
+      - Upgraded depanneur version to 0.16.17
+
+ -- Biao Wang <biao716.wang@samsung.com>  Tue, 05 Jul 2022 12:30:00 +0800
+
 gbs (0.25.23) unstable; urgency=high
   * upgrade to gbs v0.25.23, which contains the following features:
      * New feature and enhancements added:

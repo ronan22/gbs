@@ -1,3 +1,9 @@
+* Tue Jul 05 2022 Biao Wang <biao716.wang@samsung.com> 0.25.24
+  * upgrade to gbs v0.25.24, which contains the following features:
+    * New feature and enhancements added:
+      - Fix Build error dlog aarch64.
+      - Upgraded depanneur version to 0.16.17.
+
 * Wed Apr 27 2022 Biao Wang <biao716.wang@samsung.com> 0.25.23
   * upgrade to gbs v0.25.23, which contains the following features:
     * New feature and enhancements added:
