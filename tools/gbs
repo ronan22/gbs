@@ -350,6 +350,8 @@ def build_parser(parser):
                         help='Profiling report location to be used package ordering.')
     group.add_argument('--with-submodules', action='store_true',
                         help='build project with submodules togerther')
+    group.add_argument('--release', type=str,
+                        help='Override Release in spec file')
 
     parser.set_defaults(alias="lb")
     return parser

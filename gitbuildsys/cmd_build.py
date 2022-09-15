@@ -304,6 +304,9 @@ def prepare_depanneur_opts(args):
     if args.profiling:
         cmd_opts += ['--profiling=%s' % args.profiling]
 
+    if args.release:
+        cmd_opts += ['--release=%s' % args.release]
+
     cmd_opts += ['--threads=%s' % args.threads]
     if args.kvm:
         loopdev = len([name for name in os.listdir('/dev') if bool(re.search("loop[0-9]",name))])
