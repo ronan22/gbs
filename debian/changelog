@@ -4,8 +4,9 @@ gbs (0.25.25) unstable; urgency=high
       - Always retry 3 times to download if download fail.
       - Add logic to re-downloading packages in reorder step if some packages is missed!
       - Fix build crash issue in  gbs export in obs-server-gbs
+      - Add --release option.
 
- -- Biao Wang <biao716.wang@samsung.com>  Wed, 03 Aug 2022 12:30:00 +0800
+ -- Biao Wang <biao716.wang@samsung.com>  Tue, 20 Sep 2022 12:30:00 +0800
 
 gbs (0.25.24) unstable; urgency=high
   * upgrade to gbs v0.25.24, which contains the following features:

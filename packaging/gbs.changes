@@ -1,9 +1,10 @@
-* Wed Aug 03 2022 Biao Wang <biao716.wang@samsung.com> 0.25.25
+* Tue Sep 20 2022 Biao Wang <biao716.wang@samsung.com> 0.25.25
   * upgrade to gbs v0.25.25, which contains the following features:
     * New feature and enhancements added:
       - Always retry 3 times to download if download fail.
       - Add logic to re-downloading packages in reorder step if some packages is missed!
       - Fix build crash issue in  gbs export in obs-server-gbs
+      - Add --relase option.
 
 * Tue Jul 05 2022 Biao Wang <biao716.wang@samsung.com> 0.25.24
   * upgrade to gbs v0.25.24, which contains the following features:
