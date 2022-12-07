@@ -1,3 +1,11 @@
+Release notes for gbs 0.25.26
+==========================
+
+- Release Date: 2022-12
+
+- New feature and enhancements added:
+    * Ignore reorder packages list during cumulative build.
+
 Release notes for gbs 0.25.25
 ==========================
 

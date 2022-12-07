@@ -1,3 +1,8 @@
+* Tue Sep 20 2022 Biao Wang <biao716.wang@samsung.com> 0.25.26
+  * upgrade to gbs v0.25.26, which contains the following features:
+    * New feature and enhancements added:
+      - Ignore reorder packages list during cumulative build.
+
 * Tue Sep 20 2022 Biao Wang <biao716.wang@samsung.com> 0.25.25
   * upgrade to gbs v0.25.25, which contains the following features:
     * New feature and enhancements added:

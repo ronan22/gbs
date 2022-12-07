@@ -1,3 +1,10 @@
+gbs (0.25.26) unstable; urgency=high
+  * upgrade to gbs v0.25.26, which contains the following features:
+     * New feature and enhancements added:
+      - Ignore reorder packages list during cumulative build.
+
+ -- Biao Wang <biao716.wang@samsung.com>  Tue, 06 Dec 2022 12:30:00 +0800
+
 gbs (0.25.25) unstable; urgency=high
   * upgrade to gbs v0.25.25, which contains the following features:
      * New feature and enhancements added:
