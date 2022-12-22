@@ -231,8 +231,8 @@ def export_sources(repo, commit, export_dir, spec, args, create_tarball=True):
                       "file. Also, check the upstream tag format.\n"
                       "  2. Remove or rename the upstream branch (change the "
                       "package to native)\n"
-                      "See https://source.tizen.org/documentation/reference/"
-                      "git-build-system/upstream-package for more details.")
+                      "See https://docs.tizen.org/platform/reference/"
+                      "gbs/gbs-maintenance-models/#manage-upstream-sources for more details.")
             fallback = configmgr.get_arg_conf(args, 'fallback_to_native')
             if config_is_true(fallback):
                 # Try falling back to old logic of one monolithic tarball
