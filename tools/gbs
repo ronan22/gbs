@@ -352,6 +352,8 @@ def build_parser(parser):
                         help='build project with submodules togerther')
     group.add_argument('--release', type=str,
                         help='Override Release in spec file')
+    group.add_argument('--nocumulate', action='store_true',
+                        help='without cumulative build')
 
     parser.set_defaults(alias="lb")
     return parser

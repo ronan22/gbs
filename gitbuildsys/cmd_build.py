@@ -249,6 +249,8 @@ def prepare_depanneur_simple_opts(args):
         cmd_opts += ['--export-only']
     if args.with_submodules:
         cmd_opts += ['--with-submodules']
+    if args.nocumulate:
+        cmd_opts += ['--nocumulate']
 
     return cmd_opts
 
